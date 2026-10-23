@@ -20,8 +20,18 @@ const tag = `v${pkg.version}`;
 function notes() {
   const lines = fs.readFileSync(path.join(ROOT, 'CHANGELOG.md'), 'utf8').split(/\r?\n/);
   const start = lines.findIndex((l) => l.trim() === `## ${pkg.version}`);
+  // --since=1.1.0 — собрать изменения всех версий новее указанной (если промежуточные не публиковались)
+  const since = (process.argv.find((a) => a.startsWith('--since=')) || '').slice(8);
   const out = [];
-  for (let i = start + 1; start >= 0 && i < lines.length && !lines[i].startsWith('## '); i++) out.push(lines[i]);
+  for (let i = start + 1; start >= 0 && i < lines.length; i++) {
+    if (lines[i].startsWith('## ')) {
+      const v = lines[i].slice(3).trim();
+      if (!since || v === since) break;
+      out.push('', `**Версия ${v}**`);
+      continue;
+    }
+    out.push(lines[i]);
+  }
   const text = out.join('\n').trim();
   if (!text) throw new Error(`В CHANGELOG.md нет раздела «## ${pkg.version}» с описанием изменений`);
   return text;
