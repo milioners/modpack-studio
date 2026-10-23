@@ -16,8 +16,13 @@ const APP_ID = '7B3E9C52-4A1D-4F8B-9E26-5D0C1A7F3B91';
 async function main() {
   const iscc = findIscc();
   if (!iscc) throw new Error('Inno Setup 6 не найден: winget install JRSoftware.InnoSetup');
-  fs.rmSync(DIST, { recursive: true, force: true });
+  // установщики прошлых версий не трогаем — их могут ещё публиковать; чистим только промежуточную упаковку
   fs.mkdirSync(DIST, { recursive: true });
+  try {
+    fs.rmSync(path.join(DIST, 'pack'), { recursive: true, force: true });
+  } catch {
+    console.log('   Не удалось очистить dist/pack (файлы заняты) — упаковка перезапишет их');
+  }
 
   console.log('1/2 Упаковка Electron…');
   // Если архив Electron уже скачивался — берём его из кэша, сеть не нужна
