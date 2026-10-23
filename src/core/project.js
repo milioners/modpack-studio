@@ -45,17 +45,54 @@ function defaults(info = {}) {
       outputDir: '',
       showChangelog: true,
       launchGame: true,
+      installerType: 'mps', // mps — свой установщик, inno — классический Inno Setup
     },
     // История версий: [{ version, date, text }], новые сверху. «Что нового» в установщике берётся отсюда
     changelog: [],
+    // Оформление собственного установщика (ModPack Installer)
+    installer: defaultInstallerTheme(),
+    // Откуда установщик игрока берёт обновления модпака: none | github (repo) | url (адрес update.json)
+    publish: { type: 'none', repo: '', url: '' },
     tree: [],
+  };
+}
+
+function defaultInstallerTheme() {
+  return {
+    preset: 'tactic',
+    colors: {
+      bg: '#0F1115', surface: '#181B21', card: '#1F232B', border: '#2C313B', text: '#EEE9DF', muted: '#8F8A80',
+      accent: '#F0A53A', accentText: '#1D1305', danger: '#EF5D55', success: '#5CC98A',
+    },
+    backgroundImage: null, // картинка проекта (images/…), в установщик попадает перекодированной
+    bgDim: 0.6,
+    bgBlur: 6,
+    surfaceOpacity: 0.9,
+    font: 'Segoe UI',
+    titleFont: 'Bahnschrift',
+    fontSize: 13,
+    radius: 12,
+    layout: 'grid', // grid | list
+    cardSize: 'm', // s | m | l
+    nav: 'tabs', // tabs | sidebar
+    width: 1100,
+    height: 700,
+    animations: true,
+    welcomeScreen: true,
+    texts: { welcomeTitle: '', welcomeText: '', installButton: 'Установить', finishTitle: 'Готово!', finishText: '' },
   };
 }
 
 // Достраивает недостающие поля (проекты старых версий, ручное редактирование)
 function normalize(p) {
   const d = defaults();
-  const out = { ...d, ...p, info: { ...d.info, ...p.info }, design: { ...d.design, ...p.design }, options: { ...d.options, ...p.options } };
+  const di = d.installer;
+  const pi = p.installer || {};
+  const out = {
+    ...d, ...p, info: { ...d.info, ...p.info }, design: { ...d.design, ...p.design }, options: { ...d.options, ...p.options },
+    installer: { ...di, ...pi, colors: { ...di.colors, ...pi.colors }, texts: { ...di.texts, ...pi.texts } },
+    publish: { ...d.publish, ...p.publish },
+  };
   const fix = (nodes) => nodes.map((n) => (n.type === 'group'
     ? { id: n.id || newId('g'), type: 'group', name: n.name || 'Группа', description: n.description || '', preview: n.preview || null,
       mode: n.mode === 'single' ? 'single' : 'multi', checked: n.checked !== false, expanded: n.expanded !== false, children: fix(n.children || []) }
@@ -137,7 +174,7 @@ function storeImage(dir, srcPath) {
 
 // Удаляет картинки и файлы модов, на которые больше ничего не ссылается
 function collectGarbage(dir, p) {
-  const used = new Set([p.design.bannerImage, p.design.sidebarImage, p.design.icon]);
+  const used = new Set([p.design.bannerImage, p.design.sidebarImage, p.design.icon, p.installer?.backgroundImage]);
   const modIds = new Set();
   for (const { node } of walk(p.tree)) {
     used.add(node.preview);
@@ -227,7 +264,7 @@ function changelogText(p, limit = 3) {
 }
 
 module.exports = {
-  bumpVersion, changelogText,
+  defaultInstallerTheme, bumpVersion, changelogText,
   FORMAT, PROJECT_FILE, newId, defaults, normalize, create, open, save, walk, allMods,
   storeModFiles, removeModFiles, storeImage, collectGarbage, validate, stats,
 };

@@ -43,8 +43,24 @@ function main() {
     console.log('Это предпросмотр. Чтобы опубликовать: node scripts/release.js --publish');
     return;
   }
-  execFileSync('gh', ['release', 'create', tag, setup, shaFile, '--repo', pkg.updateRepo, '--title', `ModPack Studio ${pkg.version}`, '--notes-file', notesFile],
-    { stdio: 'inherit' });
+  // Черновик → загрузка файлов с повторами (большие файлы при плохой связи обрываются) → публикация.
+  // Пока релиз черновик, программы его не видят, поэтому наполовину загруженный релиз никому не попадёт.
+  const gh = (args) => execFileSync('gh', [...args, '--repo', pkg.updateRepo], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] });
+  gh(['release', 'create', tag, '--draft', '--target', 'main', '--title', `ModPack Studio ${pkg.version}`, '--notes-file', notesFile]);
+  for (const file of [shaFile, setup]) {
+    for (let attempt = 1; ; attempt++) {
+      try {
+        gh(['release', 'upload', tag, file, '--clobber']);
+        break;
+      } catch (e) {
+        if (attempt >= 5) throw new Error(`Не удалось загрузить ${path.basename(file)}: ${e.message}`);
+        console.log(`Повтор загрузки ${path.basename(file)} (${attempt})…`);
+      }
+    }
+  }
+  const names = gh(['release', 'view', tag, '--json', 'assets', '--jq', '.assets[].name']).split(/\r?\n/);
+  if (!names.includes(path.basename(setup)) || !names.includes(path.basename(shaFile))) throw new Error('В релизе не хватает файлов — он остался черновиком');
+  gh(['release', 'edit', tag, '--draft=false']);
   console.log('Опубликовано. Установленные программы увидят обновление при следующем запуске.');
 }
 

@@ -1,14 +1,14 @@
 {
   "name": "modpack-studio",
   "productName": "ModPack Studio",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Конструктор модпаков для «Мира танков»",
   "main": "src/main/main.js",
   "author": "ModPack Studio",
   "license": "MIT",
   "scripts": {
     "start": "electron .",
-    "test": "node --test tests/core.test.js tests/online.test.js",
+    "test": "node --test tests/core.test.js tests/online.test.js tests/installer.test.js",
     "dist": "node scripts/build.js",
     "catalog": "node scripts/catalog.js",
     "release": "node scripts/release.js"

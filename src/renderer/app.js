@@ -155,7 +155,7 @@ function changed({ tree = true, inspector = false, shell = false } = {}) {
     if (tree) renderTree();
     if (inspector) renderInspector();
   }
-  if (S.page === 'design') renderMock();
+  if (S.page === 'design') { if (isMps()) schedulePreview(); else renderMock(); }
   if (shell) renderSidebar();
 }
 
@@ -327,7 +327,9 @@ function renderPage() {
     renderTree();
     renderInspector();
   }
-  if (S.page === 'design') renderMock();
+  if (S.page === 'design') {
+    if (isMps()) { paintPreview(); schedulePreview(IP.img ? 900 : 50); } else renderMock();
+  }
   hydrate(page);
   if (S.page === 'build') {
     const c = $('#console');
@@ -662,6 +664,7 @@ function imagePicker(field, label, hint, aspect) {
 }
 
 function pageDesign() {
+  if (isMps()) return pageInstallerDesign();
   const d = S.proj.design;
   return `${head('Оформление', 'Баннер, картинки и тексты установщика. Справа — как это увидит игрок.')}
     <div class="design-grid">
@@ -707,6 +710,10 @@ function pageInfo() {
         </div>
         <div class="note">Если указана версия игры, установщик предупредит игрока, если у него другая версия клиента.</div></div>
       <div class="panel"><h2>Установка и сборка</h2><p class="sub">Как ведёт себя установщик</p>
+        <div class="field" style="margin-bottom:16px"><span>Тип установщика</span><div class="segmented">
+          <button class="${o.installerType !== 'inno' ? 'on' : ''}" data-act="itype" data-val="mps">Свой дизайн (ModPack Installer)</button>
+          <button class="${o.installerType === 'inno' ? 'on' : ''}" data-act="itype" data-val="inno">Классический Inno Setup</button></div>
+          <small class="hint-text">${o.installerType !== 'inno' ? 'Полностью своё оформление, карточки модов с превью, кнопка «Обновить модпак». Ничего устанавливать не нужно — собирается встроенным в Windows компилятором.' : 'Стандартное окно мастера установки. Нужен Inno Setup 6.'}</small></div>
         <label class="toggle"><input type="checkbox" data-obind-check="cleanDefault" ${o.cleanDefault ? 'checked' : ''}><span class="track"></span><span>Предлагать убрать старые моды перед установкой</span></label>
         <div class="note" style="margin:6px 0 16px 50px">Папки <code>mods/&lt;версия&gt;</code> и <code>res_mods/&lt;версия&gt;</code> переносятся в <code>modpack_backup</code> — ничего не теряется. Игрок может снять эту галочку.</div>
         <label class="toggle"><input type="checkbox" data-obind-check="showChangelog" ${o.showChangelog ? 'checked' : ''}><span class="track"></span><span>Показывать страницу «Что нового»</span></label>
@@ -728,7 +735,7 @@ function pageBuild() {
   const st = S.stats;
   const tile = (ic, n, label) => `<div class="stat"><div class="ico-wrap">${icon(ic, 20)}</div><div><b>${n}</b><small>${label}</small></div></div>`;
   return `${head('Сборка установщика', 'Один .exe-файл: игрок запускает его, выбирает моды и получает их в своей игре.')}
-    ${S.st.iscc ? '' : `<div class="banner bad">${icon('alert', 22)}<div class="grow"><b>Inno Setup 6 не найден</b><small>Установите его: <code>winget install JRSoftware.InnoSetup</code></small></div>
+    ${S.st.iscc || isMps() ? '' : `<div class="banner bad">${icon('alert', 22)}<div class="grow"><b>Inno Setup 6 не найден</b><small>Установите его: <code>winget install JRSoftware.InnoSetup</code></small></div>
       <button class="btn sm" data-act="external" data-url="https://jrsoftware.org/isdl.php">${icon('external', 14)}Скачать</button><button class="btn sm" data-act="recheck">${icon('refresh', 14)}Проверить снова</button></div>`}
     <div class="stats">${tile('catalog', st.mods, plural(st.mods, 'мод', 'мода', 'модов'))}${tile('folder', st.groups, plural(st.groups, 'группа', 'группы', 'групп'))}${tile('file', st.files, plural(st.files, 'файл', 'файла', 'файлов'))}${tile('build', fmtSize(st.size), 'до сжатия')}</div>
     ${versionPanel()}
@@ -741,7 +748,7 @@ function pageBuild() {
           ${!errors.length && !warnings.length ? `<div class="chk ok">${icon('installed', 16)}<span>Ошибок и замечаний нет</span></div>` : ''}
         </div>
         <div style="margin-top:18px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-          <button class="btn primary big" data-act="build" ${!S.st.iscc || b.running || errors.length ? 'disabled' : ''}>
+          <button class="btn primary big" data-act="build" ${(!isMps() && !S.st.iscc) || b.running || errors.length ? 'disabled' : ''}>
             ${b.running ? '<span class="spinner"></span>Собираю…' : `${icon('build', 18)}Собрать установщик`}</button>
           <button class="btn big" data-act="preview-installer">${icon('play', 16)}Предпросмотр</button>
         </div>
@@ -756,7 +763,8 @@ function pageBuild() {
         <h4 class="sect">История сборок</h4>
         ${buildHistory()}
       </div>
-    </div>`;
+    </div>
+    ${isMps() ? publishPanel() : ''}`;
 }
 
 async function runBuild() {
@@ -781,9 +789,12 @@ async function runBuild() {
   renderPage();
   try {
     const p = S.proj;
+    let assets;
+    if (isMps()) assets = await mpsAssets(p, { log });
+    else {
     const urls = { banner: await getImg(p.design.bannerImage), sidebar: await getImg(p.design.sidebarImage), icon: await getImg(p.design.icon) };
     log('Рисую баннер, картинку приветствия и иконку…');
-    const assets = {
+    assets = {
       banner: ART.toRgba(await ART.banner(p, urls)),
       sidebar: ART.toRgba(await ART.sidebar(p, urls)),
       packImage: ART.toRgba(await ART.preview({ name: p.info.name, type: 'pack' }, urls.banner, p.design.accent)),
@@ -793,6 +804,7 @@ async function runBuild() {
     const nodes = [...walk(p.tree)].map((x) => x.node);
     log(`Рисую превью модов (${nodes.length})…`);
     for (const n of nodes) assets.previews[n.id] = ART.toRgba(await ART.preview(n, await getImg(n.preview), p.design.accent));
+    }
     const res = await call(api.build, S.proj, assets);
     S.builds = res.project.builds;
     S.build.result = res;

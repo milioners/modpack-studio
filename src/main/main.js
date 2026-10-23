@@ -15,6 +15,8 @@ const online = require('../core/online');
 const builds = require('../core/builds');
 const updater = require('./updater');
 const pkg = require('../../package.json');
+const mps = require('../core/mpsinstaller');
+const { spawn, execFile } = require('child_process');
 
 const APP_ROOT = path.join(__dirname, '..', '..');
 const DEMO_CATALOG = path.join(APP_ROOT, 'catalog');
@@ -169,6 +171,108 @@ async function nodeFromCatalog(dir, m) {
   }
 }
 
+// ---------- свой установщик (ModPack Installer) ----------
+
+const stubCache = () => path.join(app.getPath('userData'), 'installer-cache');
+
+async function stubFor(data, assets, send = () => {}) {
+  let icon = null;
+  if (assets.icon?.length) {
+    icon = path.join(os.tmpdir(), `mps-icon-${process.pid}.ico`);
+    fs.writeFileSync(icon, Buffer.from(assets.icon));
+  } else if (fs.existsSync(APP_ICON)) icon = APP_ICON;
+  send('Компилирую установщик…');
+  return mps.compileStub({ icon, title: data.info.name, version: data.info.version, company: data.info.author || data.info.name, cacheDir: stubCache() });
+}
+
+async function buildMps(cur, assets, send) {
+  const stub = await stubFor(cur.data, assets, send);
+  const outDir = cur.data.options.outputDir || path.join(cur.dir, 'output');
+  const exePath = path.join(outDir, mps.exeName(cur.data));
+  send('Упаковываю моды и оформление…');
+  let last = -1;
+  mps.pack(cur.dir, cur.data, assets, {
+    outFile: exePath, stub,
+    onProgress: (k) => {
+      const pct = Math.floor(k * 10) * 10;
+      if (pct !== last) { last = pct; send(`  ${pct}%`); }
+    },
+  });
+  const hash = mps.sha256File(exePath);
+  fs.writeFileSync(`${exePath}.sha256`, `${hash}  ${path.basename(exePath)}\n`);
+  if (cur.data.publish.type === 'url') {
+    mps.writeUpdateJson(exePath, cur.data);
+    send('Создан update.json — загрузите его вместе с установщиком по адресу обновлений');
+  }
+  send(`Готово: ${exePath}`);
+  return { exePath, size: fs.statSync(exePath).size, builtAt: new Date().toISOString(), sha256: hash };
+}
+
+// Установщик без файлов модов — для предпросмотра оформления
+async function previewExe(data, assets) {
+  const cur = accept(data);
+  const stub = await stubFor(cur.data, assets);
+  const out = path.join(os.tmpdir(), 'mps-preview', `preview-${Date.now()}.exe`);
+  fs.rmSync(path.dirname(out), { recursive: true, force: true });
+  mps.pack(cur.dir, cur.data, assets, { outFile: out, stub, includeMods: false });
+  return out;
+}
+
+// ---------- публикация модпака на GitHub автора ----------
+
+function gh(args, opts = {}) {
+  return new Promise((resolve, reject) => {
+    execFile('gh', args, { windowsHide: true, maxBuffer: 16 * 1024 * 1024, ...opts }, (err, stdout, stderr) => {
+      if (err) reject(new Error((stderr || err.message).trim()));
+      else resolve(String(stdout));
+    });
+  });
+}
+
+async function publishGithub(data, send) {
+  const cur = accept(data);
+  const repo = (cur.data.publish.repo || '').trim();
+  if (!/^[\w.-]+\/[\w.-]+$/.test(repo)) throw new Error('Укажите репозиторий в виде владелец/название');
+  const outDir = cur.data.options.outputDir || path.join(cur.dir, 'output');
+  const exe = path.join(outDir, mps.exeName(cur.data));
+  if (!fs.existsSync(exe) || !fs.existsSync(`${exe}.sha256`)) throw new Error('Сначала соберите установщик этой версии');
+  try {
+    await gh(['--version']);
+  } catch {
+    throw new Error('Не найден GitHub CLI (gh). Установите его: winget install GitHub.cli, затем войдите: gh auth login');
+  }
+  try {
+    await gh(['auth', 'status']);
+  } catch {
+    throw new Error('GitHub CLI не авторизован. Выполните в терминале: gh auth login');
+  }
+  const tag = `v${cur.data.info.version}`;
+  const notesFile = path.join(os.tmpdir(), `mps-notes-${Date.now()}.md`);
+  fs.writeFileSync(notesFile, project.changelogText(cur.data, 1) || `Версия ${cur.data.info.version}`, 'utf8');
+  send(`Создаю черновик релиза ${tag} в ${repo}…`);
+  try {
+    await gh(['release', 'create', tag, '--repo', repo, '--draft', '--title', `${cur.data.info.name} ${cur.data.info.version}`, '--notes-file', notesFile]);
+  } catch (e) {
+    if (/already exists/i.test(e.message)) send('Релиз с этой версией уже есть — дозагружаю файлы');
+    else if (/not found|Could not resolve/i.test(e.message)) throw new Error(`Репозиторий ${repo} не найден. Создайте его на GitHub (можно пустой) и повторите.`);
+    else throw e;
+  }
+  for (const file of [`${exe}.sha256`, exe]) {
+    for (let attempt = 1; ; attempt++) {
+      send(`Загружаю ${path.basename(file)}${attempt > 1 ? ` (попытка ${attempt})` : ''}…`);
+      try {
+        await gh(['release', 'upload', tag, file, '--repo', repo, '--clobber'], { timeout: 60 * 60 * 1000 });
+        break;
+      } catch (e) {
+        if (attempt >= 5) throw new Error(`Не удалось загрузить ${path.basename(file)}: ${e.message}`);
+      }
+    }
+  }
+  await gh(['release', 'edit', tag, '--repo', repo, '--draft=false']);
+  send('Опубликовано! Установщики игроков увидят обновление при следующем запуске.');
+  return `https://github.com/${repo}/releases/tag/${tag}`;
+}
+
 // ---------- IPC ----------
 
 function handle(channel, fn) {
@@ -309,6 +413,14 @@ function registerIpc() {
         writeBmp(p, img.w, img.h, img.rgba);
         return p;
       };
+      if (cur.data.options.installerType !== 'inno') {
+        const result = await buildMps(cur, assets, send);
+        builds.record(path.dirname(result.exePath), {
+          file: path.basename(result.exePath), version: cur.data.info.version, builtAt: result.builtAt, size: result.size,
+          mods: project.allMods(cur.data).length,
+        });
+        return { ...result, project: projectState() };
+      }
       send('Готовлю картинки…');
       const files = {
         banner: bmp('banner', assets.banner),
@@ -387,6 +499,18 @@ function registerIpc() {
     builds.remove(projectState().outputDir, file);
     return projectState();
   });
+
+  handle('installer:snapshot', async (data, assets, screen) => {
+    const exe = await previewExe(data, assets);
+    const png = path.join(path.dirname(exe), `${screen}.png`);
+    await mps.screenshot(exe, screen, png);
+    return `data:image/png;base64,${fs.readFileSync(png).toString('base64')}`;
+  });
+  handle('installer:preview', async (data, assets) => {
+    const exe = await previewExe(data, assets);
+    spawn(exe, ['--preview'], { detached: true, stdio: 'ignore' }).unref();
+  });
+  handle('publish:github', (data) => publishGithub(data, (l) => win?.webContents.send('build:log', l)));
 
   handle('shell:open', (p) => shell.openPath(p));
   handle('shell:show', (p) => shell.showItemInFolder(p));

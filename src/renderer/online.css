@@ -98,3 +98,29 @@
 .mock.dark .mock-btn.primary { border-color: #4cc2ff; box-shadow: inset 0 0 0 1px #4cc2ff; }
 .mock.dark .mock-welcome { background: #2b2b2b; }
 .mock.dark .mock-wtext p { color: #e6e6e6; }
+
+/* ---------- редактор оформления своего установщика ---------- */
+.ip-editor { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.ip-editor .panel + .panel { margin-top: 0; }
+.ip-editor .field + .field, .ip-editor .field + .form-grid, .ip-editor .form-grid + .field { margin-top: 14px; }
+.presets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.preset { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 10px 12px; border-radius: 11px; border: 1px solid var(--border-2); background: var(--bg-2); color: var(--text); cursor: pointer; font-weight: 600; font-size: 13px; }
+.preset:hover { border-color: #4a4f58; }
+.preset.on { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.preset .sw { display: flex; width: 100%; height: 22px; border-radius: 6px; overflow: hidden; }
+.preset .sw i { flex: 1; }
+.color-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.color-field { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 10px; background: var(--bg-2); border: 1px solid var(--border); cursor: pointer; }
+.color-field input { width: 30px; height: 30px; border: 0; padding: 0; background: none; cursor: pointer; flex: none; }
+.color-field span { flex: 1; font-size: 13px; }
+.color-field code { font-size: 11px; }
+.range { width: 100%; accent-color: var(--accent); }
+.slider-val { color: var(--accent); font-weight: 700; margin-left: 6px; }
+.toggles { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+.ip-preview { display: flex; flex-direction: column; gap: 10px; }
+.ip-shot { border-radius: 10px; overflow: hidden; background: var(--bg-2); min-height: 280px; display: grid; place-items: center; position: relative; }
+.ip-shot img { width: 100%; height: auto; display: block; transition: opacity 0.2s; }
+.ip-shot.busy img { opacity: 0.55; }
+.ip-shot.busy::after { content: ""; position: absolute; top: 14px; right: 14px; width: 18px; height: 18px; border: 2px solid rgba(255, 255, 255, 0.2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
+.ip-foot { display: flex; align-items: center; justify-content: space-between; }
+.publish-panel { margin-top: 16px; }

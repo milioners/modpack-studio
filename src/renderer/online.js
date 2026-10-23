@@ -291,6 +291,11 @@ api.onCatalogProgress(({ id, got, total }) => {
 // ---------- действия ----------
 
 Object.assign(ACTIONS, {
+  itype: (el) => {
+    S.proj.options.installerType = el.dataset.val;
+    changed({ tree: false });
+    renderPage();
+  },
   'cat-reload': () => loadCatalog(true),
   'cat-cat': (el) => {
     S.cat.category = el.dataset.cat;
