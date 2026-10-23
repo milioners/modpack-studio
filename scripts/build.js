@@ -20,7 +20,19 @@ async function main() {
   fs.mkdirSync(DIST, { recursive: true });
 
   console.log('1/2 Упаковка Electron…');
+  // Если архив Electron уже скачивался — берём его из кэша, сеть не нужна
+  const electronVersion = require('electron/package.json').version;
+  const zipName = `electron-v${electronVersion}-win32-x64.zip`;
+  const cacheRoot = path.join(process.env.LOCALAPPDATA || '', 'electron', 'Cache');
+  let electronZipDir;
+  if (fs.existsSync(cacheRoot)) {
+    for (const d of fs.readdirSync(cacheRoot)) {
+      if (fs.existsSync(path.join(cacheRoot, d, zipName))) electronZipDir = path.join(cacheRoot, d);
+    }
+  }
+  if (electronZipDir) console.log(`   Electron ${electronVersion} из кэша`);
   const [appDir] = await packager({
+    electronZipDir,
     dir: ROOT,
     out: path.join(DIST, 'pack'),
     name: pkg.productName,

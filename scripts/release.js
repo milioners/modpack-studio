@@ -30,8 +30,13 @@ function notes() {
 function main() {
   if (!pkg.updateRepo) throw new Error('В package.json не указан updateRepo');
   const text = notes();
-  execFileSync(process.execPath, [path.join(__dirname, 'build.js')], { stdio: 'inherit', cwd: ROOT });
   const setup = path.join(DIST, `ModPack-Studio-Setup-${pkg.version}.exe`);
+  // --no-build: опубликовать уже собранный установщик (например, если сборка шла на другой машине)
+  if (process.argv.includes('--no-build')) {
+    if (!fs.existsSync(setup)) throw new Error(`Нет собранного ${path.basename(setup)} — запустите без --no-build`);
+  } else {
+    execFileSync(process.execPath, [path.join(__dirname, 'build.js')], { stdio: 'inherit', cwd: ROOT });
+  }
   const hash = crypto.createHash('sha256').update(fs.readFileSync(setup)).digest('hex');
   const shaFile = `${setup}.sha256`;
   fs.writeFileSync(shaFile, `${hash}  ${path.basename(setup)}\n`);
