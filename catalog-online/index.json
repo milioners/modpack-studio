@@ -1,0 +1,181 @@
+{
+  "format": "modpack-studio-catalog",
+  "version": 1,
+  "title": "Каталог ModPack Studio",
+  "updated": "2026-10-23T11:59:08.294Z",
+  "categories": {
+    "crosshair": "Прицелы",
+    "camera": "Зум и камера",
+    "markers": "Маркеры",
+    "lamp": "Лампа и засвет",
+    "damage": "Урон и статистика",
+    "minimap": "Миникарта",
+    "hangar": "Ангар",
+    "sound": "Звуки",
+    "other": "Разное"
+  },
+  "mods": [
+    {
+      "id": "demo_damage",
+      "name": "Демо: Лог урона и ассиста",
+      "version": "1.0",
+      "author": "ModPack Studio",
+      "category": "damage",
+      "gameVersion": "1.30",
+      "description": "Подробный журнал: нанесённый и полученный урон, урон по засвету и сбитым гусеницам, итог за бой.\n\nЭто демонстрационный мод: он кладёт текстовый файл в res_mods/<версия>/modpack_demo/ и ничего не меняет в игре.",
+      "tags": [
+        "урон",
+        "лог",
+        "статистика"
+      ],
+      "homepage": "",
+      "license": "Демо",
+      "updated": "2026-10-23T11:59:08.241Z",
+      "size": 301,
+      "sha256": "c5ac70ea39a5049cdd28740278206961ce1fe848e1b17f991f3f23ddc7aaa718",
+      "preview": "mods/demo_damage/preview.svg",
+      "download": "mods/demo_damage/demo_damage.zip"
+    },
+    {
+      "id": "demo_hangar",
+      "name": "Демо: Удобный ангар",
+      "version": "1.0",
+      "author": "ModPack Studio",
+      "category": "hangar",
+      "gameVersion": "1.30",
+      "description": "Карусель техники в несколько рядов, процент отметок и опыт на каждой машине, быстрые фильтры.\n\nЭто демонстрационный мод: он кладёт текстовый файл в res_mods/<версия>/modpack_demo/ и ничего не меняет в игре.",
+      "tags": [
+        "ангар",
+        "карусель"
+      ],
+      "homepage": "",
+      "license": "Демо",
+      "updated": "2026-10-23T11:59:08.258Z",
+      "size": 296,
+      "sha256": "785ca44b00835e21f9d7fe2a15462d2e7dfde89e333eba2044f4387068bd966b",
+      "preview": "mods/demo_hangar/preview.svg",
+      "download": "mods/demo_hangar/demo_hangar.zip"
+    },
+    {
+      "id": "demo_lamp",
+      "name": "Демо: Лампа «Шестое чувство»",
+      "version": "1.0",
+      "author": "ModPack Studio",
+      "category": "lamp",
+      "gameVersion": "1.30",
+      "description": "Крупная анимированная лампа засвета с таймером на 10 секунд и звуковым сигналом. Сразу видно, когда вас обнаружили.\n\nЭто демонстрационный мод: он кладёт текстовый файл в res_mods/<версия>/modpack_demo/ и ничего не меняет в игре.",
+      "tags": [
+        "лампа",
+        "засвет",
+        "таймер"
+      ],
+      "homepage": "",
+      "license": "Демо",
+      "updated": "2026-10-23T11:59:08.157Z",
+      "size": 379,
+      "sha256": "c7ee35b881660af8d77901aeb8ace5f1d7ae612c2fd3457e2bce41fb2e8aa07a",
+      "preview": "mods/demo_lamp/preview.svg",
+      "download": "mods/demo_lamp/demo_lamp.zip"
+    },
+    {
+      "id": "demo_markers",
+      "name": "Демо: Маркеры с полосками ХП",
+      "version": "1.0",
+      "author": "ModPack Studio",
+      "category": "markers",
+      "gameVersion": "1.30",
+      "description": "Компактные маркеры над танками: название, полоска прочности с числом ХП и иконка класса техники.\n\nЭто демонстрационный мод: он кладёт текстовый файл в res_mods/<версия>/modpack_demo/ и ничего не меняет в игре.",
+      "tags": [
+        "маркеры",
+        "хп"
+      ],
+      "homepage": "",
+      "license": "Демо",
+      "updated": "2026-10-23T11:59:08.233Z",
+      "size": 309,
+      "sha256": "95f55e02a54cd103079c360751082285d4647043f66b8db3a17a70ae5ea0c498",
+      "preview": "mods/demo_markers/preview.svg",
+      "download": "mods/demo_markers/demo_markers.zip"
+    },
+    {
+      "id": "demo_minimap",
+      "name": "Демо: Расширенная миникарта",
+      "version": "1.0",
+      "author": "ModPack Studio",
+      "category": "minimap",
+      "gameVersion": "1.30",
+      "description": "Круги обзора и отрисовки, последние позиции пропавших из засвета противников и направление стволов.\n\nЭто демонстрационный мод: он кладёт текстовый файл в res_mods/<версия>/modpack_demo/ и ничего не меняет в игре.",
+      "tags": [
+        "миникарта",
+        "обзор"
+      ],
+      "homepage": "",
+      "license": "Демо",
+      "updated": "2026-10-23T11:59:08.241Z",
+      "size": 307,
+      "sha256": "e960b9b97fe5b002af32a25ed12c77a587b2eb6672cd6bb479dcc8ec6c546c57",
+      "preview": "mods/demo_minimap/preview.svg",
+      "download": "mods/demo_minimap/demo_minimap.zip"
+    },
+    {
+      "id": "demo_sight_classic",
+      "name": "Демо: Прицел «Классика»",
+      "version": "1.0",
+      "author": "ModPack Studio",
+      "category": "crosshair",
+      "gameVersion": "1.30",
+      "description": "Минималистичный круглый прицел с точкой сведения и делениями дальности. Не перекрывает цель, хорошо читается на любых картах.\n\nЭто демонстрационный мод: он кладёт текстовый файл в res_mods/<версия>/modpack_demo/ и ничего не меняет в игре.",
+      "tags": [
+        "прицел",
+        "минимализм"
+      ],
+      "homepage": "",
+      "license": "Демо",
+      "updated": "2026-10-23T11:59:08.114Z",
+      "size": 316,
+      "sha256": "29ff7d458b0a7d98fa660cd32d410d4b613ce5d77b95817d1cf78633c8c5d8f0",
+      "preview": "mods/demo_sight_classic/preview.svg",
+      "download": "mods/demo_sight_classic/demo_sight_classic.zip"
+    },
+    {
+      "id": "demo_sight_tactic",
+      "name": "Демо: Прицел «Тактик»",
+      "version": "1.0",
+      "author": "ModPack Studio",
+      "category": "crosshair",
+      "gameVersion": "1.30",
+      "description": "Шевронный прицел в стиле военных оптических систем. Цвет меняется при сведении. Несовместим с другими прицелами.\n\nЭто демонстрационный мод: он кладёт текстовый файл в res_mods/<версия>/modpack_demo/ и ничего не меняет в игре.",
+      "tags": [
+        "прицел",
+        "шеврон"
+      ],
+      "homepage": "",
+      "license": "Демо",
+      "updated": "2026-10-23T11:59:08.129Z",
+      "size": 311,
+      "sha256": "f1dcbb6ad39784004ae263666931110753b7d3d0cd76633186a97c76248a985d",
+      "preview": "mods/demo_sight_tactic/preview.svg",
+      "download": "mods/demo_sight_tactic/demo_sight_tactic.zip"
+    },
+    {
+      "id": "demo_zoom",
+      "name": "Демо: Зум x30 и отдаление камеры",
+      "version": "1.0",
+      "author": "ModPack Studio",
+      "category": "camera",
+      "gameVersion": "1.30",
+      "description": "Добавляет кратности x16, x25, x30 в снайперский режим и увеличивает отдаление камеры в аркадном режиме.\n\nЭто демонстрационный мод: он кладёт текстовый файл в res_mods/<версия>/modpack_demo/ и ничего не меняет в игре.",
+      "tags": [
+        "зум",
+        "камера"
+      ],
+      "homepage": "",
+      "license": "Демо",
+      "updated": "2026-10-23T11:59:08.224Z",
+      "size": 306,
+      "sha256": "f96e427eddd8376f1d1b01e1d00257a23af54f739491db6a62f3284a76a58470",
+      "preview": "mods/demo_zoom/preview.svg",
+      "download": "mods/demo_zoom/demo_zoom.zip"
+    }
+  ]
+}

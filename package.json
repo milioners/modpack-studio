@@ -1,0 +1,25 @@
+{
+  "name": "modpack-studio",
+  "productName": "ModPack Studio",
+  "version": "1.1.0",
+  "description": "Конструктор модпаков для «Мира танков»",
+  "main": "src/main/main.js",
+  "author": "ModPack Studio",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test tests/core.test.js tests/online.test.js",
+    "dist": "node scripts/build.js",
+    "catalog": "node scripts/catalog.js",
+    "release": "node scripts/release.js"
+  },
+  "dependencies": {
+    "adm-zip": "0.5.16"
+  },
+  "devDependencies": {
+    "@electron/packager": "18.3.6",
+    "electron": "33.2.1"
+  },
+  "updateRepo": "milioners/modpack-studio",
+  "catalogUrl": "https://raw.githubusercontent.com/milioners/modpack-studio/main/catalog-online/index.json"
+}

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#16141c"/><stop offset="1" stop-color="#211d2b"/></linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#c17ad6" stop-opacity="0.35"/><stop offset="1" stop-color="#c17ad6" stop-opacity="0"/></radialGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="#ffffff" stroke-opacity="0.04"/></pattern>
+  </defs>
+  <rect width="640" height="360" fill="url(#bg)"/><rect width="640" height="360" fill="url(#grid)"/>
+  <circle cx="320" cy="180" r="220" fill="url(#glow)"/><g transform="translate(150 70)">
+        <rect width="340" height="40" rx="8" fill="#000" fill-opacity="0.3"/><rect width="5" height="40" rx="2" fill="#ffb547"/>
+        <text x="22" y="27" font-family="Segoe UI, Arial" font-size="20" font-weight="800" fill="#ffb547">+430</text>
+        <text x="100" y="26" font-family="Segoe UI, Arial" font-size="16" fill="#e6e1d6">ИС-7 · бронебойный</text></g><g transform="translate(150 122)">
+        <rect width="340" height="40" rx="8" fill="#000" fill-opacity="0.3"/><rect width="5" height="40" rx="2" fill="#ffb547"/>
+        <text x="22" y="27" font-family="Segoe UI, Arial" font-size="20" font-weight="800" fill="#ffb547">+390</text>
+        <text x="100" y="26" font-family="Segoe UI, Arial" font-size="16" fill="#e6e1d6">Т-10 · подкалиберный</text></g><g transform="translate(150 174)">
+        <rect width="340" height="40" rx="8" fill="#000" fill-opacity="0.3"/><rect width="5" height="40" rx="2" fill="#6aa8ff"/>
+        <text x="22" y="27" font-family="Segoe UI, Arial" font-size="20" font-weight="800" fill="#6aa8ff">+210</text>
+        <text x="100" y="26" font-family="Segoe UI, Arial" font-size="16" fill="#e6e1d6">Ассист по засвету</text></g><g transform="translate(150 226)">
+        <rect width="340" height="40" rx="8" fill="#000" fill-opacity="0.3"/><rect width="5" height="40" rx="2" fill="#ff6159"/>
+        <text x="22" y="27" font-family="Segoe UI, Arial" font-size="20" font-weight="800" fill="#ff6159">−320</text>
+        <text x="100" y="26" font-family="Segoe UI, Arial" font-size="16" fill="#e6e1d6">Получено · E 100</text></g><g transform="translate(150 278)">
+        <rect width="340" height="40" rx="8" fill="#000" fill-opacity="0.3"/><rect width="5" height="40" rx="2" fill="#6fe3a1"/>
+        <text x="22" y="27" font-family="Segoe UI, Arial" font-size="20" font-weight="800" fill="#6fe3a1">+180</text>
+        <text x="100" y="26" font-family="Segoe UI, Arial" font-size="16" fill="#e6e1d6">Ассист по гусенице</text></g></svg>

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#141a1f"/><stop offset="1" stop-color="#24201a"/></linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#ffb547" stop-opacity="0.35"/><stop offset="1" stop-color="#ffb547" stop-opacity="0"/></radialGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="#ffffff" stroke-opacity="0.04"/></pattern>
+  </defs>
+  <rect width="640" height="360" fill="url(#bg)"/><rect width="640" height="360" fill="url(#grid)"/>
+  <circle cx="320" cy="180" r="220" fill="url(#glow)"/><g stroke="#ffb547" stroke-width="3" fill="none">
+      <circle cx="320" cy="180" r="78"/><circle cx="320" cy="180" r="118" stroke-dasharray="6 10" stroke-opacity="0.5"/>
+      <path d="M320 70v60M320 230v60M210 180h60M370 180h60"/>
+      <path d="M338 196v8"/><path d="M352 196v14"/><path d="M366 196v8"/><path d="M380 196v14"/>
+    </g><circle cx="320" cy="180" r="5" fill="#ffd27a"/></svg>

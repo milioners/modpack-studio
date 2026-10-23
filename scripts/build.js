@@ -1,0 +1,103 @@
+// Сборка установщика программы: упаковка Electron → установщик Inno Setup.
+// Запуск: npm run dist   (результат: dist/ModPack-Studio-Setup-<версия>.exe)
+// DIST_DIR=<папка> — собрать в другую папку.
+'use strict';
+
+const fs = require('fs');
+const path = require('path');
+const { packager } = require('@electron/packager');
+const { findIscc, compileIss } = require('../src/core/inno');
+const pkg = require('../package.json');
+
+const ROOT = path.join(__dirname, '..');
+const DIST = path.resolve(process.env.DIST_DIR || path.join(ROOT, 'dist'));
+const APP_ID = '7B3E9C52-4A1D-4F8B-9E26-5D0C1A7F3B91';
+
+async function main() {
+  const iscc = findIscc();
+  if (!iscc) throw new Error('Inno Setup 6 не найден: winget install JRSoftware.InnoSetup');
+  fs.rmSync(DIST, { recursive: true, force: true });
+  fs.mkdirSync(DIST, { recursive: true });
+
+  console.log('1/2 Упаковка Electron…');
+  const [appDir] = await packager({
+    dir: ROOT,
+    out: path.join(DIST, 'pack'),
+    name: pkg.productName,
+    executableName: pkg.productName,
+    platform: 'win32',
+    arch: 'x64',
+    icon: path.join(ROOT, 'build', 'icon.ico'),
+    overwrite: true,
+    prune: true,
+    asar: false, // Inno Setup при сборке модпаков читает файлы каталога напрямую
+    ignore: [/^\/(tests|scripts|dist|installer|catalog-online|screenshots)(\/|$)/, /^\/CHANGELOG\.md$/, /^\/build\/icon\.png$/, /\.md$/, /^\/catalog\/catalog\.json\.tmp$/],
+    appCopyright: `© ${new Date().getFullYear()} ${pkg.author}`,
+    win32metadata: {
+      CompanyName: pkg.author,
+      FileDescription: pkg.description,
+      ProductName: pkg.productName,
+      InternalName: pkg.productName,
+    },
+  });
+  console.log(`   → ${appDir}`);
+
+  console.log('2/2 Сборка установщика Inno Setup…');
+  const exeName = `${pkg.productName}.exe`;
+  const iss = `; Установщик ModPack Studio — сгенерирован scripts/build.js
+[Setup]
+AppId={{${APP_ID}}
+AppName=${pkg.productName}
+AppVersion=${pkg.version}
+AppVerName=${pkg.productName} ${pkg.version}
+AppPublisher=${pkg.author}
+VersionInfoVersion=${pkg.version}
+VersionInfoDescription=${pkg.productName} — установщик
+DefaultDirName={autopf}\\${pkg.productName}
+DefaultGroupName=${pkg.productName}
+DisableProgramGroupPage=yes
+PrivilegesRequired=lowest
+PrivilegesRequiredOverridesAllowed=dialog
+ArchitecturesAllowed=x64compatible
+ArchitecturesInstallIn64BitMode=x64compatible
+OutputDir=${DIST}
+OutputBaseFilename=ModPack-Studio-Setup-${pkg.version}
+SetupIconFile=${path.join(ROOT, 'build', 'icon.ico')}
+UninstallDisplayIcon={app}\\${exeName}
+UninstallDisplayName=${pkg.productName}
+Compression=lzma2/ultra64
+SolidCompression=yes
+WizardStyle=modern
+CloseApplications=yes
+
+[Languages]
+Name: "russian"; MessagesFile: "compiler:Languages\\Russian.isl"
+Name: "english"; MessagesFile: "compiler:Default.isl"
+
+[Tasks]
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
+
+[Files]
+Source: "${appDir}\\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+
+[Icons]
+Name: "{group}\\${pkg.productName}"; Filename: "{app}\\${exeName}"
+Name: "{group}\\{cm:UninstallProgram,${pkg.productName}}"; Filename: "{uninstallexe}"
+Name: "{autodesktop}\\${pkg.productName}"; Filename: "{app}\\${exeName}"; Tasks: desktopicon
+
+[Run]
+Filename: "{app}\\${exeName}"; Description: "{cm:LaunchProgram,${pkg.productName}}"; Flags: nowait postinstall skipifsilent
+; после тихого автообновления программа запускается снова
+Filename: "{app}\\${exeName}"; Flags: nowait runasoriginaluser; Check: WizardSilent
+`;
+  const issPath = path.join(DIST, 'ModPack-Studio.iss');
+  fs.writeFileSync(issPath, '﻿' + iss, 'utf8');
+  await compileIss(issPath, () => {}, iscc);
+  const setup = path.join(DIST, `ModPack-Studio-Setup-${pkg.version}.exe`);
+  console.log(`Готово: ${setup} (${(fs.statSync(setup).size / 1024 / 1024).toFixed(1)} МБ)`);
+}
+
+main().catch((e) => {
+  console.error(e.message);
+  process.exit(1);
+});

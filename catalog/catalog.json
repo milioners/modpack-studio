@@ -1,0 +1,168 @@
+{
+  "mods": [
+    {
+      "id": "demo_sight_classic",
+      "name": "Демо: Прицел «Классика»",
+      "category": "crosshair",
+      "version": "1.0",
+      "author": "ModPack Studio",
+      "description": "Минималистичный круглый прицел с точкой сведения и делениями дальности. Не перекрывает цель, хорошо читается на любых картах.\n\nЭто демонстрационный мод: он кладёт текстовый файл в res_mods/<версия>/modpack_demo/ и ничего не меняет в игре.",
+      "tags": [
+        "прицел",
+        "минимализм"
+      ],
+      "conflicts": [
+        "demo_sight_tactic"
+      ],
+      "preview": "preview.svg",
+      "files": [
+        {
+          "src": "files/demo_sight_classic.txt",
+          "dst": "res_mods/{game_version}/modpack_demo/crosshair.txt"
+        }
+      ]
+    },
+    {
+      "id": "demo_sight_tactic",
+      "name": "Демо: Прицел «Тактик»",
+      "category": "crosshair",
+      "version": "1.0",
+      "author": "ModPack Studio",
+      "description": "Шевронный прицел в стиле военных оптических систем. Цвет меняется при сведении. Несовместим с другими прицелами.\n\nЭто демонстрационный мод: он кладёт текстовый файл в res_mods/<версия>/modpack_demo/ и ничего не меняет в игре.",
+      "tags": [
+        "прицел",
+        "шеврон"
+      ],
+      "conflicts": [],
+      "preview": "preview.svg",
+      "files": [
+        {
+          "src": "files/demo_sight_tactic.txt",
+          "dst": "res_mods/{game_version}/modpack_demo/crosshair.txt"
+        }
+      ]
+    },
+    {
+      "id": "demo_lamp",
+      "name": "Демо: Лампа «Шестое чувство»",
+      "category": "lamp",
+      "version": "1.0",
+      "author": "ModPack Studio",
+      "description": "Крупная анимированная лампа засвета с таймером на 10 секунд и звуковым сигналом. Сразу видно, когда вас обнаружили.\n\nЭто демонстрационный мод: он кладёт текстовый файл в res_mods/<версия>/modpack_demo/ и ничего не меняет в игре.",
+      "tags": [
+        "лампа",
+        "засвет",
+        "таймер"
+      ],
+      "conflicts": [],
+      "preview": "preview.svg",
+      "files": [
+        {
+          "src": "files/lamp",
+          "dst": "res_mods/{game_version}/modpack_demo/lamp"
+        }
+      ]
+    },
+    {
+      "id": "demo_zoom",
+      "name": "Демо: Зум x30 и отдаление камеры",
+      "category": "camera",
+      "version": "1.0",
+      "author": "ModPack Studio",
+      "description": "Добавляет кратности x16, x25, x30 в снайперский режим и увеличивает отдаление камеры в аркадном режиме.\n\nЭто демонстрационный мод: он кладёт текстовый файл в res_mods/<версия>/modpack_demo/ и ничего не меняет в игре.",
+      "tags": [
+        "зум",
+        "камера"
+      ],
+      "conflicts": [],
+      "preview": "preview.svg",
+      "files": [
+        {
+          "src": "files/demo_zoom.txt",
+          "dst": "res_mods/{game_version}/modpack_demo/demo_zoom.txt"
+        }
+      ]
+    },
+    {
+      "id": "demo_markers",
+      "name": "Демо: Маркеры с полосками ХП",
+      "category": "markers",
+      "version": "1.0",
+      "author": "ModPack Studio",
+      "description": "Компактные маркеры над танками: название, полоска прочности с числом ХП и иконка класса техники.\n\nЭто демонстрационный мод: он кладёт текстовый файл в res_mods/<версия>/modpack_demo/ и ничего не меняет в игре.",
+      "tags": [
+        "маркеры",
+        "хп"
+      ],
+      "conflicts": [],
+      "preview": "preview.svg",
+      "files": [
+        {
+          "src": "files/demo_markers.txt",
+          "dst": "res_mods/{game_version}/modpack_demo/demo_markers.txt"
+        }
+      ]
+    },
+    {
+      "id": "demo_damage",
+      "name": "Демо: Лог урона и ассиста",
+      "category": "damage",
+      "version": "1.0",
+      "author": "ModPack Studio",
+      "description": "Подробный журнал: нанесённый и полученный урон, урон по засвету и сбитым гусеницам, итог за бой.\n\nЭто демонстрационный мод: он кладёт текстовый файл в res_mods/<версия>/modpack_demo/ и ничего не меняет в игре.",
+      "tags": [
+        "урон",
+        "лог",
+        "статистика"
+      ],
+      "conflicts": [],
+      "preview": "preview.svg",
+      "files": [
+        {
+          "src": "files/demo_damage.txt",
+          "dst": "res_mods/{game_version}/modpack_demo/demo_damage.txt"
+        }
+      ]
+    },
+    {
+      "id": "demo_minimap",
+      "name": "Демо: Расширенная миникарта",
+      "category": "minimap",
+      "version": "1.0",
+      "author": "ModPack Studio",
+      "description": "Круги обзора и отрисовки, последние позиции пропавших из засвета противников и направление стволов.\n\nЭто демонстрационный мод: он кладёт текстовый файл в res_mods/<версия>/modpack_demo/ и ничего не меняет в игре.",
+      "tags": [
+        "миникарта",
+        "обзор"
+      ],
+      "conflicts": [],
+      "preview": "preview.svg",
+      "files": [
+        {
+          "src": "files/demo_minimap.txt",
+          "dst": "res_mods/{game_version}/modpack_demo/demo_minimap.txt"
+        }
+      ]
+    },
+    {
+      "id": "demo_hangar",
+      "name": "Демо: Удобный ангар",
+      "category": "hangar",
+      "version": "1.0",
+      "author": "ModPack Studio",
+      "description": "Карусель техники в несколько рядов, процент отметок и опыт на каждой машине, быстрые фильтры.\n\nЭто демонстрационный мод: он кладёт текстовый файл в res_mods/<версия>/modpack_demo/ и ничего не меняет в игре.",
+      "tags": [
+        "ангар",
+        "карусель"
+      ],
+      "conflicts": [],
+      "preview": "preview.svg",
+      "files": [
+        {
+          "src": "files/demo_hangar.txt",
+          "dst": "res_mods/{game_version}/modpack_demo/demo_hangar.txt"
+        }
+      ]
+    }
+  ]
+}
