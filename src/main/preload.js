@@ -26,6 +26,8 @@ contextBridge.exposeInMainWorld('api', {
   build: call('build:run'),
   deleteBuild: call('builds:delete'),
   installerSnapshot: call('installer:snapshot'),
+  layoutMeta: call('layout:meta'),
+  layoutTemplate: call('layout:template'),
   installerPreview: call('installer:preview'),
   publishGithub: call('publish:github'),
 

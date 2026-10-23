@@ -9,6 +9,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { readJson, writeJsonAtomic, sizeOf } = require('./fsutil');
+const { normalizeLayout, layoutImages, template } = require('./layout');
 
 const FORMAT = 'modpack-studio-project';
 const PROJECT_FILE = 'project.json';
@@ -80,6 +81,7 @@ function defaultInstallerTheme() {
     animations: true,
     welcomeScreen: true,
     texts: { welcomeTitle: '', welcomeText: '', installButton: 'Установить', finishTitle: 'Готово!', finishText: '' },
+    layout: template('classic'),
   };
 }
 
@@ -90,7 +92,7 @@ function normalize(p) {
   const pi = p.installer || {};
   const out = {
     ...d, ...p, info: { ...d.info, ...p.info }, design: { ...d.design, ...p.design }, options: { ...d.options, ...p.options },
-    installer: { ...di, ...pi, colors: { ...di.colors, ...pi.colors }, texts: { ...di.texts, ...pi.texts } },
+    installer: { ...di, ...pi, colors: { ...di.colors, ...pi.colors }, texts: { ...di.texts, ...pi.texts }, layout: normalizeLayout(pi.layout) },
     publish: { ...d.publish, ...p.publish },
   };
   const fix = (nodes) => nodes.map((n) => (n.type === 'group'
@@ -174,7 +176,7 @@ function storeImage(dir, srcPath) {
 
 // Удаляет картинки и файлы модов, на которые больше ничего не ссылается
 function collectGarbage(dir, p) {
-  const used = new Set([p.design.bannerImage, p.design.sidebarImage, p.design.icon, p.installer?.backgroundImage]);
+  const used = new Set([p.design.bannerImage, p.design.sidebarImage, p.design.icon, p.installer?.backgroundImage, ...layoutImages(p.installer?.layout)]);
   const modIds = new Set();
   for (const { node } of walk(p.tree)) {
     used.add(node.preview);

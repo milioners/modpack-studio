@@ -70,7 +70,17 @@ async function mpsAssets(p, { previews = true, log = () => {} } = {}) {
     logo: await logoBytes(p),
     icon: await ART.icon(p, urls),
     previews: {},
+    layoutImages: {},
   };
+  const rels = new Set();
+  for (const sc of Object.values(p.installer.layout.screens)) {
+    if (sc.background.image) rels.add(sc.background.image);
+    for (const e of sc.elements) if (e.type === 'image' && e.props.src && !e.props.src.startsWith('@')) rels.add(e.props.src);
+  }
+  for (const rel of rels) {
+    const png = /\.(png|svg|gif|webp)$/i.test(rel);
+    assets.layoutImages[rel] = await encodeImage(rel, 1920, png ? 'image/png' : 'image/jpeg');
+  }
   if (previews) {
     const nodes = [...walk(p.tree)].map((x) => x.node);
     log(`Рисую превью модов (${nodes.length})…`);

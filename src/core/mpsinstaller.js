@@ -224,6 +224,25 @@ function manifestAndEntries(projectDir, project, assets, includeMods) {
     logo: img('logo.png', assets.logo),
     texts: { ...th.texts },
   };
+  // Картинки раскладки (элементы «Картинка» и фоны экранов) — перекодированы конструктором в PNG/JPEG
+  const layoutImg = new Map();
+  let li = 0;
+  const mapImg = (rel) => {
+    if (!rel) return null;
+    if (rel === '@logo') return theme.logo || null;
+    if (rel === '@banner') return theme.banner || null;
+    if (!layoutImg.has(rel)) {
+      const data = assets.layoutImages?.[rel];
+      layoutImg.set(rel, data ? img(`l${li++}${data[0] === 0xff ? '.jpg' : '.png'}`, data) : null);
+    }
+    return layoutImg.get(rel);
+  };
+  const lay = JSON.parse(JSON.stringify(th.layout));
+  for (const sc of Object.values(lay.screens)) {
+    sc.background.image = sc.background.image ? mapImg(sc.background.image) : null;
+    for (const e of sc.elements) if (e.type === 'image') e.props.src = mapImg(e.props.src);
+  }
+  theme.layout = lay;
   const conv = (n) => {
     if (n.type === 'group') {
       return { id: n.id, type: 'group', name: n.name, description: n.description, mode: n.mode, checked: n.checked,

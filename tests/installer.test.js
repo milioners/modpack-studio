@@ -86,6 +86,33 @@ test('свой установщик: установка, переустанов�
   assert.ok(!fs.existsSync(mdir), 'папка управления удалена');
 });
 
+test('раскладка: шаблоны, нормализация и картинки в установщике', () => {
+  const layout = require('../src/core/layout');
+  for (const name of Object.keys(layout.TEMPLATES)) {
+    const t = layout.template(name);
+    assert.deepStrictEqual(Object.keys(t.screens), layout.SCREENS);
+    for (const sc of Object.values(t.screens)) for (const e of sc.elements) assert.ok(layout.TYPES[e.type], e.type);
+  }
+  const n = layout.normalizeLayout({ screens: { welcome: { elements: [{ type: 'text', x: 1.6, w: -5, showIf: 'взлом' }, { type: 'script' }] } } });
+  const [el] = n.screens.welcome.elements;
+  assert.strictEqual(n.screens.welcome.elements.length, 1, 'неизвестные типы отбрасываются');
+  assert.strictEqual(el.x, 2);
+  assert.strictEqual(el.w, 8);
+  assert.strictEqual(el.showIf, 'always');
+  assert.ok(n.screens.mods.elements.length > 0, 'недостающие экраны берутся из шаблона');
+
+  const dir = path.join(tmpDir(), 'proj');
+  const p = createDemo(dir, path.join(__dirname, '..', 'catalog'));
+  p.installer.layout.screens.welcome.elements.push({ ...n.screens.welcome.elements[0], type: 'image', props: { src: 'images/x.png', fit: 'cover' } });
+  p.installer.layout.screens.mods.background.image = 'images/x.png';
+  const png = Buffer.from('89504e470d0a1a0a', 'hex');
+  const { manifest, entries } = mps.manifestAndEntries(dir, p, { layoutImages: { 'images/x.png': png } }, false);
+  const img = manifest.theme.layout.screens.welcome.elements.find((e) => e.type === 'image' && e.props.src?.startsWith('img/l'));
+  assert.ok(img, 'картинка элемента переименована в путь внутри установщика');
+  assert.strictEqual(manifest.theme.layout.screens.mods.background.image, img.props.src, 'одна картинка упакована один раз');
+  assert.strictEqual(entries.filter((e) => e.name.startsWith('img/l')).length, 1);
+});
+
 test('свой установщик: снимок окна без показа на экране', { skip: !mps.findCsc() }, async () => {
   const root = tmpDir();
   const dir = path.join(root, 'proj');

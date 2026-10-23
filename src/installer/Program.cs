@@ -71,7 +71,7 @@ namespace ModPackInstaller
                 }
                 if (flag("uninstall") && nearby != null)
                 {
-                    win.Loaded += delegate { win.Dispatcher.BeginInvoke(new Action(() => win.ShowManage())); };
+                    win.Loaded += delegate { win.Dispatcher.BeginInvoke(new Action(() => win.ShowScreen("manage"))); };
                 }
                 app.Run(win);
                 return 0;

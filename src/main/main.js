@@ -16,6 +16,7 @@ const builds = require('../core/builds');
 const updater = require('./updater');
 const pkg = require('../../package.json');
 const mps = require('../core/mpsinstaller');
+const layout = require('../core/layout');
 const { spawn, execFile } = require('child_process');
 
 const APP_ROOT = path.join(__dirname, '..', '..');
@@ -500,6 +501,10 @@ function registerIpc() {
     return projectState();
   });
 
+  handle('layout:meta', () => ({
+    types: layout.TYPES, actions: layout.ACTIONS, showIf: layout.SHOW_IF, templates: layout.TEMPLATES, screens: layout.SCREENS, screenNames: layout.SCREEN_NAMES,
+  }));
+  handle('layout:template', (name, size) => layout.template(name, size));
   handle('installer:snapshot', async (data, assets, screen) => {
     const exe = await previewExe(data, assets);
     const png = path.join(path.dirname(exe), `${screen}.png`);

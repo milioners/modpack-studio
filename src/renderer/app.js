@@ -155,7 +155,7 @@ function changed({ tree = true, inspector = false, shell = false } = {}) {
     if (tree) renderTree();
     if (inspector) renderInspector();
   }
-  if (S.page === 'design') { if (isMps()) schedulePreview(); else renderMock(); }
+  if (S.page === 'design') { if (!isMps()) renderMock(); else if (CE.tab === 'theme') schedulePreview(); }
   if (shell) renderSidebar();
 }
 
@@ -328,7 +328,10 @@ function renderPage() {
     renderInspector();
   }
   if (S.page === 'design') {
-    if (isMps()) { paintPreview(); schedulePreview(IP.img ? 900 : 50); } else renderMock();
+    if (!isMps()) renderMock();
+    else if (CE.tab === 'theme') { paintPreview(); schedulePreview(IP.img ? 900 : 50); }
+    else if (!CE.meta) quiet(ceInit().then(() => ceRender()));
+    else { ceStage(); ceProps(); }
   }
   hydrate(page);
   if (S.page === 'build') {
@@ -664,7 +667,7 @@ function imagePicker(field, label, hint, aspect) {
 }
 
 function pageDesign() {
-  if (isMps()) return pageInstallerDesign();
+  if (isMps()) return pageCanvasEditor();
   const d = S.proj.design;
   return `${head('Оформление', 'Баннер, картинки и тексты установщика. Справа — как это увидит игрок.')}
     <div class="design-grid">
@@ -889,6 +892,14 @@ async function setImage(target, rel) {
     if (!r) return;
     r.node.preview = rel;
     changed({ inspector: true });
+  } else if (target === 'ce:bg') {
+    ceSnap();
+    scr().background.image = rel;
+    ceCommit();
+  } else if (target.startsWith('inst:')) {
+    S.proj.installer[target.slice(5)] = rel;
+    changed({ tree: false });
+    renderPage();
   } else if (target.startsWith('design:')) {
     S.proj.design[target.slice(7)] = rel;
     changed({ tree: false, shell: true });
