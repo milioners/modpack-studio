@@ -19,6 +19,7 @@ const updater = require('./updater');
 const pkg = require('../../package.json');
 const mps = require('../core/mpsinstaller');
 const layout = require('../core/layout');
+const { designs } = require('../core/designs');
 const { spawn, execFile } = require('child_process');
 
 const APP_ROOT = path.join(__dirname, '..', '..');
@@ -508,6 +509,7 @@ function registerIpc() {
     animIn: layout.ANIM_IN, animLoop: layout.ANIM_LOOP, social: layout.SOCIAL,
   }));
   handle('layout:template', (name, size) => layout.template(name, size));
+  handle('layout:designs', () => designs());
 
   // Видео и звуки проекта (media/…)
   handle('media:pick', async (kind) => {

@@ -118,7 +118,7 @@ function elHtml(e) {
     case 'text': {
       const jc = p.valign === 'center' ? 'center' : p.valign === 'bottom' ? 'flex-end' : 'flex-start';
       const grad = p.fill2 ? `background:linear-gradient(${(p.angle || 0) + 90}deg, ${col(p.color)}, ${col(p.fill2)});-webkit-background-clip:text;color:transparent;` : `color:${col(p.color)};`;
-      const t = sampleFill(p.upper ? String(p.text).toUpperCase() : p.text);
+      const t = p.upper ? sampleFill(p.text).toUpperCase() : sampleFill(p.text);
       return `<div class="ce-text" style="justify-content:${jc};text-align:${p.align};font:${p.italic ? 'italic ' : ''}${p.weight === 'bold' ? 700 : p.weight === 'semibold' ? 600 : p.weight === 'light' ? 300 : 400} ${p.size}px '${fontOf(p.font)}', 'Segoe UI';${p.lineHeight ? `line-height:${p.lineHeight}px;` : ''}${p.shadow ? 'filter:drop-shadow(0 1px 6px rgba(0,0,0,.85));' : ''}"><span style="${grad}">${esc(t)}</span></div>`;
     }
     case 'image': {
@@ -220,7 +220,8 @@ function pageCanvasEditor() {
       <aside class="ce-left">
         <div class="ce-sect">Экраны</div>
         ${screenList().map((k) => `<button class="ce-scr ${CE.screen === k ? 'on' : ''}" data-act="ce-screen" data-screen="${k}">${k.startsWith('custom_') ? icon('file', 12) : ''}${esc(screenName(k))}
-          ${L.screens[k].enabled === false ? '<span class="badge">выкл</span>' : ''}<span class="n">${L.screens[k].elements.length}</span></button>`).join('')}
+          ${L.screens[k].enabled === false ? '<span class="badge">выкл</span>' : ''}<span class="n">${L.screens[k].elements.length}</span>
+          ${k.startsWith('custom_') ? `<i class="ce-scr-del" data-act="ce-del-screen" data-screen="${k}" title="Удалить экран">✕</i>` : ''}</button>`).join('')}
         <div class="row-btns" style="margin-top:6px"><button class="btn sm" data-act="ce-add-screen">${icon('plus', 12)}Экран</button><button class="btn sm" data-act="ce-templates">${icon('catalog', 12)}Шаблоны</button></div>
         <div class="ce-sect">Добавить</div>
         ${ADD_GROUPS.map(([g, list]) => `<div class="ce-addgrp">${g}</div><div class="ce-add">${list.map((k) => `<button data-act="ce-add" data-type="${k}" title="${esc(CE.meta.types[k].name)}">${icon(ADD_ICONS[k] || 'plus', 14)}<span>${esc(CE.meta.types[k].name)}</span></button>`).join('')}</div>`).join('')}
@@ -940,27 +941,29 @@ async function editPreset(id) {
   ceLiveSchedule();
 }
 
-// Галерея готовых дизайнов: шаблон раскладки + палитра
-const GALLERY = [
-  ['Тактика', 'classic', 'tactic'], ['Сталь', 'sidebar', 'steel'], ['Большой фон', 'hero', 'tactic'], ['Неон', 'hero', 'neon'],
-  ['Хаки', 'classic', 'khaki'], ['Багровый', 'sidebar', 'crimson'], ['Компактный', 'compact', 'steel'], ['Светлый', 'classic', 'arctic'],
-];
+// Галерея готовых дизайнов (src/core/designs.js): раскладка с разным набором экранов + палитра, шрифты, скругление
+const screensWord = (n) => (n % 10 === 1 && n % 100 !== 11 ? 'экран' : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 'экрана' : 'экранов');
 
 async function openGallery() {
-  const layouts = {};
-  for (const [, tpl] of GALLERY) if (!layouts[tpl]) layouts[tpl] = await call(api.layoutTemplate, tpl);
-  const cards = GALLERY.map(([name, tpl, pal], i) => {
-    paletteOverride = THEME_PRESETS[pal].colors;
-    const L = layouts[tpl];
+  const list = await call(api.layoutDesigns);
+  const cards = list.map((d, i) => {
+    paletteOverride = d.colors;
+    const L = d.layout;
     const k = 260 / L.window.width;
-    const inner = stageInner(L.screens.welcome, false);
-    const html = `<button class="ce-gal" data-gi="${i}"><div class="ce-gal-shot" style="height:${L.window.height * k}px"><div class="ce-stage" style="width:${L.window.width}px;height:${L.window.height}px;transform:scale(${k});background:${col('@bg')};color:${col('@text')};--ce-surface:${alpha('@surface', 0.92)};--ce-card:${alpha('@card', 0.92)};--ce-border:${col('@border')};--ce-muted:${col('@muted')};--ce-radius:12px">${inner}</div></div><b>${esc(name)}</b></button>`;
+    const order = Object.keys(L.screens).filter((key) => key !== 'manage' && L.screens[key].enabled !== false);
+    const first = L.screens[order[0]];
+    const inner = stageInner(first, false);
+    const strip = order.map((key) => `<i title="${esc(L.screens[key].name || CE.meta?.screenNames?.[key] || key)}"></i>`).join('');
+    const html = `<button class="ce-gal" data-gi="${i}"><div class="ce-gal-shot" style="height:${L.window.height * k}px"><div class="ce-stage" style="width:${L.window.width}px;height:${L.window.height}px;transform:scale(${k});background:${col('@bg')};color:${col('@text')};--ce-surface:${alpha('@surface', 0.92)};--ce-card:${alpha('@card', 0.92)};--ce-border:${col('@border')};--ce-muted:${col('@muted')};--ce-radius:${d.radius}px">${inner}</div></div>
+      <div class="ce-gal-strip">${strip}</div><b>${esc(d.name)}</b>
+      <div class="ce-gal-meta"><span>${d.screens} ${screensWord(d.screens)}</span>${d.custom.map((n) => `<span>+ ${esc(n)}</span>`).join('')}</div>
+      <small>${esc(d.description)}</small></button>`;
     paletteOverride = null;
     return html;
   }).join('');
   let chosen = null;
   const r = await modal({
-    title: 'Галерея дизайнов', sub: 'Выберите готовый дизайн — затем меняйте что угодно. Ваши картинки, музыка и тексты сохранятся. Отменить — Ctrl+Z.', ic: 'sparkle', wide: true,
+    title: 'Галерея дизайнов', sub: 'Готовые дизайны с разным набором экранов. Выберите — затем меняйте что угодно. Ваши картинки, музыка и моды сохранятся. Отменить — Ctrl+Z.', ic: 'sparkle', wide: true,
     body: `<div class="ce-gallery">${cards}</div>`,
     onMount: (root) => root.querySelectorAll('.ce-gal').forEach((b) => b.addEventListener('click', () => {
       root.querySelectorAll('.ce-gal').forEach((x) => x.classList.toggle('on', x === b));
@@ -969,19 +972,26 @@ async function openGallery() {
     actions: [{ label: 'Отмена', value: null }, { label: 'Применить', value: 'ok', primary: true }],
   });
   if (!r || chosen === null) return;
-  const [name, tpl, pal] = GALLERY[chosen];
+  const d = list[chosen];
   ceSnap();
-  S.proj.installer.layout = JSON.parse(JSON.stringify(layouts[tpl]));
-  Object.assign(S.proj.installer.colors, THEME_PRESETS[pal].colors);
-  S.proj.installer.titleFont = THEME_PRESETS[pal].titleFont;
-  S.proj.installer.radius = THEME_PRESETS[pal].radius;
-  S.proj.installer.preset = pal;
-  S.proj.design.accent = THEME_PRESETS[pal].colors.accent;
+  const L = JSON.parse(JSON.stringify(d.layout));
+  // слайдер «О модпаке» сразу показывает превью модов проекта
+  if (d.fillSlider) {
+    const imgs = allMods().map((m) => m.preview).filter(Boolean).slice(0, 6);
+    for (const sc of Object.values(L.screens)) for (const e of sc.elements) if (e.type === 'slider' && !e.props.images.length) e.props.images = imgs;
+  }
+  S.proj.installer.layout = L;
+  Object.assign(S.proj.installer.colors, d.colors);
+  S.proj.installer.font = d.font;
+  S.proj.installer.titleFont = d.titleFont;
+  S.proj.installer.radius = d.radius;
+  S.proj.installer.preset = THEME_PRESETS[d.palette] ? d.palette : 'custom';
+  S.proj.design.accent = d.colors.accent;
   phCache.clear();
   CE.sel = [];
-  CE.screen = 'welcome';
+  CE.screen = Object.keys(L.screens).find((key) => L.screens[key].enabled !== false) || 'welcome';
   ceCommit();
-  toast('ok', `Дизайн «${name}» применён`);
+  toast('ok', `Дизайн «${d.name}» применён: ${d.screens} ${screensWord(d.screens)}`);
 }
 
 Object.assign(ACTIONS, {
@@ -1187,11 +1197,18 @@ Object.assign(ACTIONS, {
     CE.sel = [];
     ceCommit();
   },
-  'ce-del-screen': async () => {
-    if (!(await confirmBox('Удалить экран?', `«${esc(scr().name)}» и все его элементы. Отменить — Ctrl+Z.`, 'Удалить', true))) return;
+  'ce-del-screen': async (el) => {
+    const key = el?.dataset?.screen || CE.screen;
+    if (!key.startsWith('custom_')) return;
+    // кнопки, которые вели на удаляемый экран, ведут на первый экран установщика
+    const to = lay().screens.welcome?.enabled !== false ? 'welcome' : 'mods';
+    if (!(await confirmBox('Удалить экран?', `«${esc(screenName(key))}» и все его элементы. Кнопки, которые вели на него, будут вести на «${esc(screenName(to))}». Отменить — Ctrl+Z.`, 'Удалить', true))) return;
     ceSnap();
-    delete lay().screens[CE.screen];
-    CE.screen = 'welcome';
+    delete lay().screens[key];
+    for (const sc of Object.values(lay().screens)) {
+      for (const e of sc.elements) if (e.type === 'button' && e.props.action === `go:${key}`) e.props.action = `go:${to}`;
+    }
+    if (CE.screen === key) CE.screen = to;
     CE.sel = [];
     ceCommit();
   },

@@ -130,3 +130,21 @@ test('установщик собирается, ставит выбор по у
   for (let i = 0; i < 40 && fs.existsSync(path.join(rm, 'lamp.ini')); i++) await new Promise((r) => setTimeout(r, 250));
   assert.ok(!fs.existsSync(path.join(rm, 'lamp.ini')));
 });
+
+test('готовые дизайны: разное число экранов, кнопки ведут на существующие экраны', () => {
+  const { designs } = require('../src/core/designs');
+  const { normalizeLayout } = require('../src/core/layout');
+  const list = designs();
+  assert.ok(list.length >= 8);
+  assert.ok(new Set(list.map((d) => d.screens)).size >= 3, 'дизайны отличаются числом экранов');
+  for (const d of list) {
+    assert.ok(d.colors && d.colors.accent, d.id);
+    const L = normalizeLayout(JSON.parse(JSON.stringify(d.layout)));
+    for (const k of Object.keys(d.layout.screens)) assert.ok(L.screens[k], `${d.id}: экран ${k} пропал при нормализации`);
+    for (const sc of Object.values(L.screens)) {
+      for (const e of sc.elements) {
+        if (e.type === 'button' && e.props.action.startsWith('go:')) assert.ok(L.screens[e.props.action.slice(3)], `${d.id}: ${e.props.action}`);
+      }
+    }
+  }
+});

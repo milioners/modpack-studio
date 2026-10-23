@@ -513,10 +513,10 @@ namespace ModPackInstaller
             {
                 case "text":
                     {
-                        var raw = p.B("upper") ? p.S("text").ToUpperInvariant() : p.S("text");
+                        var raw = p.B("upper") ? Fill(p.S("text")).ToUpperInvariant() : Fill(p.S("text"));
                         var t = new TextBlock
                         {
-                            Text = Fill(raw), FontFamily = new FontFamily(T.FontName(p.S("font")) + ", " + T.Font + ", Segoe UI"),
+                            Text = raw, FontFamily = new FontFamily(T.FontName(p.S("font")) + ", " + T.Font + ", Segoe UI"),
                             FontSize = Math.Max(6, p.N("size", 16)), FontWeight = Weight(p.S("weight")), Foreground = T.B(T.C(p.S("color"), "@text")),
                             TextWrapping = TextWrapping.Wrap, TextTrimming = TextTrimming.CharacterEllipsis,
                             FontStyle = p.B("italic") ? FontStyles.Italic : FontStyles.Normal,

@@ -198,3 +198,13 @@
 .ce-presets small { opacity: 0.6; font-weight: 600; }
 .ce-presets span { padding: 6px 14px; border-radius: 16px; border: 1px solid var(--ce-border); background: var(--ce-card); font-weight: 600; }
 .ce-presets em { opacity: 0.5; font-size: 12px; }
+
+.ce-scr { position: relative; }
+.ce-scr-del { font-style: normal; width: 18px; height: 18px; border-radius: 5px; display: grid; place-items: center; font-size: 11px; color: var(--muted); opacity: 0; margin-left: 4px; }
+.ce-scr:hover .ce-scr-del, .ce-scr.on .ce-scr-del { opacity: 1; }
+.ce-scr-del:hover { background: var(--bad-soft); color: #ff8d86; }
+.ce-gal-meta { display: flex; gap: 6px; padding: 4px 12px 0; flex-wrap: wrap; }
+.ce-gal-meta span { font-size: 11px; padding: 1px 8px; border-radius: 10px; background: var(--surface-3); color: var(--text-2); }
+.ce-gal small { display: block; padding: 4px 12px 0; color: var(--muted); font-size: 11.5px; line-height: 1.4; }
+.ce-gal-strip { display: flex; gap: 4px; padding: 6px 12px 0; }
+.ce-gal-strip i { flex: 1; height: 4px; border-radius: 2px; background: var(--accent-line); }

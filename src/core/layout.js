@@ -218,4 +218,4 @@ function screenKeys(layout) {
   return [...SCREENS, ...Object.keys(layout?.screens || {}).filter((k) => k.startsWith('custom_'))];
 }
 
-module.exports = { SCREENS, SCREEN_NAMES, TYPES, ACTIONS, SHOW_IF, ANIM_IN, ANIM_LOOP, SOCIAL, TEMPLATES, template, normalizeLayout, layoutImages, layoutMedia, screenKeys };
+module.exports = { el, header, bg, SCREENS, SCREEN_NAMES, TYPES, ACTIONS, SHOW_IF, ANIM_IN, ANIM_LOOP, SOCIAL, TEMPLATES, template, normalizeLayout, layoutImages, layoutMedia, screenKeys };
