@@ -9,7 +9,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { readJson, writeJsonAtomic, sizeOf } = require('./fsutil');
-const { normalizeLayout, layoutImages, template } = require('./layout');
+const { normalizeLayout, layoutImages, layoutMedia, template } = require('./layout');
 
 const FORMAT = 'modpack-studio-project';
 const PROJECT_FILE = 'project.json';
@@ -82,6 +82,8 @@ function defaultInstallerTheme() {
     welcomeScreen: true,
     texts: { welcomeTitle: '', welcomeText: '', installButton: 'Установить', finishTitle: 'Готово!', finishText: '' },
     layout: template('classic'),
+    // Музыка и звуки установщика (файлы проекта media/…)
+    media: { music: null, musicVolume: 0.35, musicAutoplay: true, clickSound: null },
   };
 }
 
@@ -92,7 +94,8 @@ function normalize(p) {
   const pi = p.installer || {};
   const out = {
     ...d, ...p, info: { ...d.info, ...p.info }, design: { ...d.design, ...p.design }, options: { ...d.options, ...p.options },
-    installer: { ...di, ...pi, colors: { ...di.colors, ...pi.colors }, texts: { ...di.texts, ...pi.texts }, layout: normalizeLayout(pi.layout) },
+    installer: { ...di, ...pi, colors: { ...di.colors, ...pi.colors }, texts: { ...di.texts, ...pi.texts }, media: { ...di.media, ...pi.media }, layout: normalizeLayout(pi.layout) },
+    presets: (Array.isArray(p.presets) ? p.presets : []).filter((x) => x && x.name).map((x) => ({ id: x.id || newId('p'), name: String(x.name), mods: Array.isArray(x.mods) ? x.mods : [] })),
     publish: { ...d.publish, ...p.publish },
   };
   const fix = (nodes) => nodes.map((n) => (n.type === 'group'
@@ -174,9 +177,20 @@ function storeImage(dir, srcPath) {
   return rel;
 }
 
+// Копирует видео/звук в media/ проекта (как картинки: одинаковые файлы не дублируются)
+function storeMedia(dir, srcPath) {
+  const data = fs.readFileSync(srcPath);
+  const hash = crypto.createHash('sha1').update(data).digest('hex').slice(0, 12);
+  const rel = `media/${hash}${path.extname(srcPath).toLowerCase()}`;
+  fs.mkdirSync(path.join(dir, 'media'), { recursive: true });
+  if (!fs.existsSync(path.join(dir, rel))) fs.writeFileSync(path.join(dir, rel), data);
+  return rel;
+}
+
 // Удаляет картинки и файлы модов, на которые больше ничего не ссылается
 function collectGarbage(dir, p) {
-  const used = new Set([p.design.bannerImage, p.design.sidebarImage, p.design.icon, p.installer?.backgroundImage, ...layoutImages(p.installer?.layout)]);
+  const used = new Set([p.design.bannerImage, p.design.sidebarImage, p.design.icon, p.installer?.backgroundImage, ...layoutImages(p.installer?.layout),
+    ...layoutMedia(p.installer?.layout), p.installer?.media?.music, p.installer?.media?.clickSound]);
   const modIds = new Set();
   for (const { node } of walk(p.tree)) {
     used.add(node.preview);
@@ -187,9 +201,10 @@ function collectGarbage(dir, p) {
       if (m) modIds.add(m[1]);
     }
   }
-  const imgDir = path.join(dir, 'images');
-  if (fs.existsSync(imgDir)) {
-    for (const f of fs.readdirSync(imgDir)) if (!used.has(`images/${f}`)) fs.rmSync(path.join(imgDir, f), { force: true });
+  for (const sub of ['images', 'media']) {
+    const d = path.join(dir, sub);
+    if (!fs.existsSync(d)) continue;
+    for (const f of fs.readdirSync(d)) if (!used.has(`${sub}/${f}`)) fs.rmSync(path.join(d, f), { force: true });
   }
   const modsDir = path.join(dir, 'mods');
   if (fs.existsSync(modsDir)) {
@@ -268,5 +283,5 @@ function changelogText(p, limit = 3) {
 module.exports = {
   defaultInstallerTheme, bumpVersion, changelogText,
   FORMAT, PROJECT_FILE, newId, defaults, normalize, create, open, save, walk, allMods,
-  storeModFiles, removeModFiles, storeImage, collectGarbage, validate, stats,
+  storeModFiles, removeModFiles, storeImage, storeMedia, collectGarbage, validate, stats,
 };

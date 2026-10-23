@@ -17,6 +17,15 @@ namespace ModPackInstaller
         readonly Dictionary<string, object> d;
         public J(object o) { d = o as Dictionary<string, object> ?? new Dictionary<string, object>(); }
         public bool Has(string k) { return d.ContainsKey(k) && d[k] != null; }
+        public Dictionary<string, object> Raw { get { return d; } }
+        public List<string> Strings(string k)
+        {
+            var list = new List<string>();
+            object v;
+            if (d.TryGetValue(k, out v) && v is System.Collections.IList)
+                foreach (var x in (System.Collections.IList)v) if (x != null) list.Add(Convert.ToString(x));
+            return list;
+        }
         public string S(string k, string def = "")
         {
             object v;
@@ -96,6 +105,8 @@ namespace ModPackInstaller
 
     public class ChangelogEntry { public string Version, Date, Text; }
 
+    public class Preset { public string Id, Name; public List<string> Mods = new List<string>(); }
+
     public class Manifest
     {
         public string AppId, Name, Version, Author, Website, GameVersion, Description;
@@ -104,6 +115,7 @@ namespace ModPackInstaller
         public J Theme;
         public List<Node> Tree = new List<Node>();
         public List<ChangelogEntry> Changelog = new List<ChangelogEntry>();
+        public List<Preset> Presets = new List<Preset>();
 
         public IEnumerable<Node> All() { return Tree.SelectMany(n => n.Walk()); }
         public IEnumerable<Node> Mods() { return All().Where(n => !n.IsGroup); }
@@ -130,6 +142,16 @@ namespace ModPackInstaller
             foreach (var e in j.A("changelog"))
                 m.Changelog.Add(new ChangelogEntry { Version = e.S("version"), Date = e.S("date"), Text = e.S("text") });
             foreach (var n in j.A("tree")) m.Tree.Add(ParseNode(n, null));
+            foreach (var pj in j.A("presets"))
+            {
+                var pr = new Preset { Id = pj.S("id"), Name = pj.S("name") };
+                // id модов внутри набора — массив строк
+                object raw;
+                var d = pj.Raw;
+                if (d.TryGetValue("mods", out raw) && raw is System.Collections.IList)
+                    foreach (var x in (System.Collections.IList)raw) pr.Mods.Add(Convert.ToString(x));
+                m.Presets.Add(pr);
+            }
             return m;
         }
 
@@ -183,6 +205,24 @@ namespace ModPackInstaller
                 s.CopyTo(ms);
                 return ms.ToArray();
             }
+        }
+
+        // Видео и звук проигрываются из файла: распаковываем во временную папку
+        static string tempDir;
+        public static string ExtractTemp(string name)
+        {
+            if (string.IsNullOrEmpty(name) || Zip.GetEntry(name) == null) return null;
+            if (tempDir == null)
+            {
+                tempDir = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "mps-media-" + System.Diagnostics.Process.GetCurrentProcess().Id);
+                Directory.CreateDirectory(tempDir);
+                AppDomain.CurrentDomain.ProcessExit += delegate { try { Directory.Delete(tempDir, true); } catch { } };
+            }
+            var file = System.IO.Path.Combine(tempDir, name.Replace('/', '_'));
+            if (!File.Exists(file))
+                using (var s = Zip.GetEntry(name).Open())
+                using (var o = File.Create(file)) s.CopyTo(o);
+            return file;
         }
 
         public static string Text(string name)

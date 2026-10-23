@@ -7,6 +7,8 @@ const os = require('os');
 const path = require('path');
 
 const project = require('../core/project');
+const { pathToFileURL } = require('url');
+const AdmZip = require('adm-zip');
 const importer = require('../core/importer');
 const inno = require('../core/inno');
 const { createDemo } = require('../core/demo');
@@ -503,8 +505,75 @@ function registerIpc() {
 
   handle('layout:meta', () => ({
     types: layout.TYPES, actions: layout.ACTIONS, showIf: layout.SHOW_IF, templates: layout.TEMPLATES, screens: layout.SCREENS, screenNames: layout.SCREEN_NAMES,
+    animIn: layout.ANIM_IN, animLoop: layout.ANIM_LOOP, social: layout.SOCIAL,
   }));
   handle('layout:template', (name, size) => layout.template(name, size));
+
+  // Видео и звуки проекта (media/…)
+  handle('media:pick', async (kind) => {
+    const filters = kind === 'video'
+      ? [{ name: 'Видео', extensions: ['mp4', 'wmv', 'm4v'] }]
+      : [{ name: 'Звук', extensions: ['mp3', 'wav', 'wma', 'm4a'] }];
+    const r = await dialog.showOpenDialog(win, { title: kind === 'video' ? 'Выберите видео' : 'Выберите звук', properties: ['openFile'], filters });
+    if (r.canceled || !r.filePaths[0]) return null;
+    if (fs.statSync(r.filePaths[0]).size > 300 * 1024 * 1024) throw new Error('Файл больше 300 МБ — установщик получится слишком тяжёлым');
+    return project.storeMedia(requireProject().dir, r.filePaths[0]);
+  });
+  handle('media:url', (rel) => {
+    const { dir } = requireProject();
+    const p = path.resolve(dir, rel);
+    if (!p.startsWith(path.resolve(dir) + path.sep)) throw new Error('Файл вне проекта');
+    return pathToFileURL(p).href;
+  });
+
+  // Дизайн одним файлом (.mpsdesign): палитра, шрифты, раскладка, тексты, музыка и все картинки
+  handle('design:export', async (data) => {
+    const cur = accept(data);
+    const r = await dialog.showSaveDialog(win, {
+      title: 'Сохранить дизайн установщика', defaultPath: path.join(app.getPath('desktop'), `${inno.safeName(cur.data.info.name)}.mpsdesign`),
+      filters: [{ name: 'Дизайн ModPack Studio', extensions: ['mpsdesign'] }],
+    });
+    if (r.canceled) return null;
+    const { installer, design } = cur.data;
+    const files = new Set([design.bannerImage, design.icon, installer.backgroundImage, installer.media.music, installer.media.clickSound,
+      ...layout.layoutImages(installer.layout), ...layout.layoutMedia(installer.layout)].filter(Boolean));
+    const zip = new AdmZip();
+    zip.addFile('design.json', Buffer.from(JSON.stringify({ format: 'mps-design', version: 1, installer, design: { accent: design.accent, bannerImage: design.bannerImage, icon: design.icon } }, null, 2), 'utf8'));
+    for (const rel of files) {
+      const abs = path.join(cur.dir, rel);
+      if (fs.existsSync(abs)) zip.addLocalFile(abs, path.posix.dirname(rel));
+    }
+    zip.writeZip(r.filePath);
+    return r.filePath;
+  });
+  handle('design:import', async (data) => {
+    const r = await dialog.showOpenDialog(win, { title: 'Открыть дизайн установщика', properties: ['openFile'], filters: [{ name: 'Дизайн ModPack Studio', extensions: ['mpsdesign'] }] });
+    if (r.canceled || !r.filePaths[0]) return null;
+    const cur = accept(data);
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mps-design-'));
+    try {
+      importer.extractZip(r.filePaths[0], tmp);
+      const d = JSON.parse(fs.readFileSync(path.join(tmp, 'design.json'), 'utf8'));
+      if (d.format !== 'mps-design') throw new Error('Это не файл дизайна ModPack Studio');
+      // только картинки и звуки/видео, только из папок images/ и media/
+      for (const sub of ['images', 'media']) {
+        const src = path.join(tmp, sub);
+        if (!fs.existsSync(src)) continue;
+        fs.mkdirSync(path.join(cur.dir, sub), { recursive: true });
+        for (const f of fs.readdirSync(src)) {
+          if (!/^[\w.-]+$/.test(f) || !/\.(png|jpe?g|webp|gif|svg|bmp|mp4|wmv|m4v|mp3|wav|wma|m4a)$/i.test(f)) continue;
+          fs.copyFileSync(path.join(src, f), path.join(cur.dir, sub, f));
+        }
+      }
+      cur.data.installer = d.installer;
+      Object.assign(cur.data.design, d.design || {});
+      cur.data = project.normalize(cur.data);
+      project.save(cur.dir, cur.data);
+      return projectState();
+    } finally {
+      fs.rmSync(tmp, { recursive: true, force: true });
+    }
+  });
   handle('installer:snapshot', async (data, assets, screen) => {
     const exe = await previewExe(data, assets);
     const png = path.join(path.dirname(exe), `${screen}.png`);

@@ -25,6 +25,7 @@ namespace ModPackInstaller
         public string BgImage, Banner, Logo, Font, TitleFont;
         public double Radius, FontSize, SurfaceOpacity;
         public bool Animations;
+        public J Media;
         public string WelcomeTitle, WelcomeText, InstallText, FinishTitle, FinishText;
         public J Layout;
 
@@ -85,6 +86,7 @@ namespace ModPackInstaller
             th.InstallText = Or(x.S("installButton"), "Установить"); th.FinishTitle = Or(x.S("finishTitle"), "Готово!");
             th.FinishText = Or(x.S("finishText"), "Модпак «" + m.Name + "» установлен. Можно запускать игру!");
             th.Layout = t.O("layout");
+            th.Media = t.O("media");
             return th;
         }
 
@@ -118,6 +120,13 @@ namespace ModPackInstaller
         J listProps;
         Action<double, string> progress;
         readonly List<KeyValuePair<TextBlock, string>> liveTexts = new List<KeyValuePair<TextBlock, string>>();
+        readonly List<MediaElement> screenMedia = new List<MediaElement>();
+        readonly List<System.Windows.Threading.DispatcherTimer> screenTimers = new List<System.Windows.Threading.DispatcherTimer>();
+        MediaPlayer music, clickPlayer;
+        bool musicOn;
+        bool licenseAccepted;
+        string activePreset;
+        bool snapshotMode;
 
         public MainWindow(Manifest m, string mode, string gameDirArg)
         {
@@ -148,7 +157,8 @@ namespace ModPackInstaller
             RefreshGame();
             Content = BuildShell();
             ShowScreen(Mode == "manage" ? "manage" : "welcome");
-            Loaded += delegate { CheckUpdateAsync(); };
+            Loaded += delegate { if (!snapshotMode) StartMusic(); CheckUpdateAsync(); };
+            Closed += delegate { if (music != null) music.Close(); };
         }
 
         void RefreshGame()
@@ -233,7 +243,39 @@ namespace ModPackInstaller
             b.MouseEnter += delegate { b.Opacity = 0.86; };
             b.MouseLeave += delegate { b.Opacity = 1; };
             b.MouseLeftButtonDown += delegate (object s, MouseButtonEventArgs e) { e.Handled = true; };
-            b.MouseLeftButtonUp += delegate (object s, MouseButtonEventArgs e) { e.Handled = true; click(); };
+            b.MouseLeftButtonUp += delegate (object s, MouseButtonEventArgs e) { e.Handled = true; PlayClick(); click(); };
+        }
+
+        // ---------- музыка и звуки ----------
+
+        void StartMusic()
+        {
+            var media = T.Media;
+            var file = Payload.ExtractTemp(media.S("music"));
+            if (file == null) return;
+            music = new MediaPlayer { Volume = Math.Max(0, Math.Min(1, media.N("musicVolume", 0.35))) };
+            music.Open(new Uri(file));
+            music.MediaEnded += delegate { music.Position = TimeSpan.Zero; music.Play(); };
+            musicOn = media.B("musicAutoplay", true);
+            if (musicOn) music.Play();
+        }
+
+        void ToggleMusic()
+        {
+            if (music == null) return;
+            musicOn = !musicOn;
+            if (musicOn) music.Play(); else music.Pause();
+            ShowScreen(screen);
+        }
+
+        void PlayClick()
+        {
+            if (snapshotMode) return;
+            var file = Payload.ExtractTemp(T.Media.S("clickSound"));
+            if (file == null) return;
+            if (clickPlayer == null) { clickPlayer = new MediaPlayer { Volume = 0.6 }; clickPlayer.Open(new Uri(file)); }
+            clickPlayer.Position = TimeSpan.Zero;
+            clickPlayer.Play();
         }
 
         Border Box(UIElement child, Thickness? pad = null)
@@ -343,6 +385,10 @@ namespace ModPackInstaller
             if (name == "welcome" && !ScreenDef("welcome").B("enabled", true)) name = "mods";
             screen = name;
             var def = ScreenDef(name);
+            foreach (var me in screenMedia) { try { me.Stop(); me.Close(); } catch { } }
+            screenMedia.Clear();
+            foreach (var tm in screenTimers) tm.Stop();
+            screenTimers.Clear();
             liveTexts.Clear();
             listScroll = null;
             detailHost = null;
@@ -353,8 +399,17 @@ namespace ModPackInstaller
             var bgc = T.C(b.S("color", "@bg"), "@bg");
             outer.Background = T.B(bgc);
             bgLayer.Children.Clear();
+            var bgVideo = snapshotMode ? null : Payload.ExtractTemp(b.S("video"));
             var bgImg = Img(b.S("image")) ?? Img(T.BgImage);
-            if (bgImg != null)
+            if (bgVideo != null)
+            {
+                var v = Video(bgVideo, "cover", true, true);
+                var blurV = b.N("blur", 6);
+                if (blurV > 0) { v.Effect = new BlurEffect { Radius = blurV }; v.RenderTransformOrigin = new Point(0.5, 0.5); v.RenderTransform = new ScaleTransform(1.08, 1.08); }
+                bgLayer.Children.Add(v);
+                bgLayer.Children.Add(new Rectangle { Fill = T.B(bgc, b.N("dim", 0.6)) });
+            }
+            else if (bgImg != null)
             {
                 var img = new Image { Source = bgImg, Stretch = Stretch.UniformToFill };
                 var blur = b.N("blur", 6);
@@ -380,6 +435,7 @@ namespace ModPackInstaller
                 fe.Opacity = e.N("opacity", 1);
                 Canvas.SetLeft(fe, e.N("x"));
                 Canvas.SetTop(fe, e.N("y"));
+                Decorate(fe, e);
                 canvas.Children.Add(fe);
             }
             if (listScroll != null) FillList();
@@ -412,6 +468,8 @@ namespace ModPackInstaller
                 case "hasLaunch": return M.LaunchGame && (Mode == "preview" || (gameDir != null && Game.Exe(gameDir) != null));
                 case "hasWelcome": return ScreenDef("welcome").B("enabled", true);
                 case "hasBanner": return Img(T.Banner) != null;
+                case "hasMusic": return !string.IsNullOrEmpty(T.Media.S("music"));
+                case "hasPresets": return M.Presets.Count > 0;
                 default: return true;
             }
         }
@@ -455,7 +513,7 @@ namespace ModPackInstaller
             {
                 case "text":
                     {
-                        var raw = p.S("text");
+                        var raw = p.B("upper") ? p.S("text").ToUpperInvariant() : p.S("text");
                         var t = new TextBlock
                         {
                             Text = Fill(raw), FontFamily = new FontFamily(T.FontName(p.S("font")) + ", " + T.Font + ", Segoe UI"),
@@ -466,6 +524,7 @@ namespace ModPackInstaller
                             VerticalAlignment = p.S("valign") == "center" ? VerticalAlignment.Center : p.S("valign") == "bottom" ? VerticalAlignment.Bottom : VerticalAlignment.Top,
                         };
                         if (p.N("lineHeight") > 0) t.LineHeight = p.N("lineHeight");
+                        if (!string.IsNullOrEmpty(p.S("fill2"))) t.Foreground = new LinearGradientBrush(T.C(p.S("color")), T.C(p.S("fill2")), p.N("angle", 0));
                         if (p.B("shadow")) t.Effect = new DropShadowEffect { BlurRadius = 10, ShadowDepth = 1, Opacity = 0.8, Color = Colors.Black };
                         if (raw.Contains("{")) liveTexts.Add(new KeyValuePair<TextBlock, string>(t, raw));
                         var g = new Grid();
@@ -494,6 +553,20 @@ namespace ModPackInstaller
                             BorderBrush = T.B(T.C(p.S("border"), "@border")), BorderThickness = new Thickness(p.N("borderWidth")),
                         };
                         if (p.B("shadow")) sh.Effect = new DropShadowEffect { BlurRadius = 24, ShadowDepth = 3, Opacity = 0.5, Color = Colors.Black };
+                        var frost = p.N("frosted");
+                        if (frost > 0)
+                        {
+                            double x = e.N("x"), y = e.N("y"), w = e.N("w", 100), h = e.N("h", 40), r = Math.Max(0, p.N("radius"));
+                            var glass = new Border
+                            {
+                                Background = new VisualBrush(bgLayer) { ViewboxUnits = BrushMappingMode.Absolute, Viewbox = new Rect(x, y, w, h), Stretch = Stretch.Fill },
+                                Effect = new BlurEffect { Radius = frost, KernelType = KernelType.Gaussian },
+                            };
+                            var g = new Grid { Clip = new RectangleGeometry(new Rect(0, 0, w, h), r, r) };
+                            g.Children.Add(glass);
+                            g.Children.Add(sh);
+                            return g;
+                        }
                         return sh;
                     }
                 case "button":
@@ -516,7 +589,57 @@ namespace ModPackInstaller
                         var action = p.S("action");
                         var url = p.S("url");
                         Clickable(b, () => Do(action, url));
+                        if (!string.IsNullOrEmpty(p.S("hoverFill")) || !string.IsNullOrEmpty(p.S("hoverColor")))
+                        {
+                            var normalBg = b.Background;
+                            var normalFg = label.Foreground;
+                            var hf = p.S("hoverFill");
+                            var hc = p.S("hoverColor");
+                            b.MouseEnter += delegate { if (!string.IsNullOrEmpty(hf)) b.Background = T.B(T.C(hf)); if (!string.IsNullOrEmpty(hc)) label.Foreground = T.B(T.C(hc)); b.Opacity = 1; };
+                            b.MouseLeave += delegate { b.Background = normalBg; label.Foreground = normalFg; };
+                        }
                         return b;
+                    }
+                case "video":
+                    {
+                        var file = Payload.ExtractTemp(p.S("src"));
+                        if (file == null) return null;
+                        var v = Video(file, p.S("fit", "cover"), p.B("loop", true), p.B("muted", true));
+                        var r = Math.Max(0, p.N("radius"));
+                        return new Grid { Children = { v }, Clip = new RectangleGeometry(new Rect(0, 0, e.N("w", 100), e.N("h", 40)), r, r) };
+                    }
+                case "slider": return Slider(p, e);
+                case "social": return Social(p);
+                case "stat":
+                    {
+                        var sp = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
+                        var al = p.S("align") == "center" ? HorizontalAlignment.Center : p.S("align") == "right" ? HorizontalAlignment.Right : HorizontalAlignment.Left;
+                        var raw = p.S("value");
+                        var v = new TextBlock { Text = Fill(raw), FontSize = p.N("valueSize", 36), FontWeight = FontWeights.Bold, Foreground = T.B(T.C(p.S("color"), "@accent")),
+                            FontFamily = new FontFamily(T.TitleFont + ", " + T.Font + ", Segoe UI"), HorizontalAlignment = al };
+                        if (raw.Contains("{")) liveTexts.Add(new KeyValuePair<TextBlock, string>(v, raw));
+                        sp.Children.Add(v);
+                        var l = Text(p.S("label"), 13, null, T.C(p.S("labelColor"), "@muted"));
+                        l.HorizontalAlignment = al;
+                        sp.Children.Add(l);
+                        return new Grid { Children = { sp } };
+                    }
+                case "license": return License(p);
+                case "presets": return Presets(p);
+                case "musicbtn":
+                    {
+                        if (music == null && string.IsNullOrEmpty(T.Media.S("music"))) return null;
+                        var on = musicOn || snapshotMode;
+                        var path = new Path
+                        {
+                            Data = Geometry.Parse(on ? "M 3,9 H 7 L 12,4 V 20 L 7,15 H 3 Z M 15,8 Q 18,12 15,16 M 17,5 Q 22,12 17,19" : "M 3,9 H 7 L 12,4 V 20 L 7,15 H 3 Z M 15,9 L 21,15 M 21,9 L 15,15"),
+                            Stroke = T.B(T.C(p.S("color"), "@text")), StrokeThickness = 1.8, Width = 24, Height = 24, Stretch = Stretch.None,
+                            HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center,
+                            StrokeLineJoin = PenLineJoin.Round, StrokeStartLineCap = PenLineCap.Round, StrokeEndLineCap = PenLineCap.Round,
+                        };
+                        var mb = new Border { Background = T.B(T.C(p.S("fill"), "@card")), CornerRadius = new CornerRadius(p.N("radius", 20)), Child = path };
+                        Clickable(mb, ToggleMusic);
+                        return mb;
                     }
                 case "modlist": return ModList(p);
                 case "moddetail":
@@ -569,7 +692,262 @@ namespace ModPackInstaller
                 case "uninstall": ConfirmUninstall(); break;
                 case "minimize": WindowState = WindowState.Minimized; break;
                 case "close": Close(); break;
+                case "toggleMusic": ToggleMusic(); break;
+                default:
+                    if (action != null && action.StartsWith("go:") && T.Layout.O("screens").Has(action.Substring(3))) ShowScreen(action.Substring(3));
+                    break;
             }
+        }
+
+        // ---------- эффекты, анимации, наведение ----------
+
+        void Decorate(FrameworkElement fe, J e)
+        {
+            var rotate = e.N("rotate");
+            var anim = e.O("anim");
+            var hover = e.O("hover");
+            var scale = new ScaleTransform(1, 1);
+            var rot = new RotateTransform(rotate);
+            var move = new TranslateTransform();
+            var tg = new TransformGroup();
+            tg.Children.Add(scale);
+            tg.Children.Add(rot);
+            tg.Children.Add(move);
+            fe.RenderTransformOrigin = new Point(0.5, 0.5);
+            fe.RenderTransform = tg;
+
+            // наведение: увеличение, подъём, свечение
+            double hs = hover.N("scale", 1), lift = hover.N("lift");
+            bool glow = hover.B("glow");
+            if (hs != 1 || lift != 0 || glow)
+            {
+                fe.MouseEnter += delegate
+                {
+                    var d = new Duration(TimeSpan.FromMilliseconds(160));
+                    scale.BeginAnimation(ScaleTransform.ScaleXProperty, new DoubleAnimation(hs, d));
+                    scale.BeginAnimation(ScaleTransform.ScaleYProperty, new DoubleAnimation(hs, d));
+                    move.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(-lift, d));
+                    if (glow) fe.Effect = new DropShadowEffect { Color = T.Accent, BlurRadius = 26, ShadowDepth = 0, Opacity = 0.6 };
+                };
+                var prevEffect = fe.Effect;
+                fe.MouseLeave += delegate
+                {
+                    var d = new Duration(TimeSpan.FromMilliseconds(200));
+                    scale.BeginAnimation(ScaleTransform.ScaleXProperty, new DoubleAnimation(1, d));
+                    scale.BeginAnimation(ScaleTransform.ScaleYProperty, new DoubleAnimation(1, d));
+                    move.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(0, d));
+                    if (glow) fe.Effect = prevEffect;
+                };
+            }
+            if (!T.Animations) return;
+
+            // появление
+            var kind = anim.S("in", "none");
+            var dur = TimeSpan.FromMilliseconds(Math.Max(50, anim.N("duration", 450)));
+            var delay = TimeSpan.FromMilliseconds(Math.Max(0, anim.N("delay")));
+            var ease = new CubicEase { EasingMode = EasingMode.EaseOut };
+            if (kind != "none")
+            {
+                var target = fe.Opacity;
+                fe.Opacity = 0;
+                fe.BeginAnimation(OpacityProperty, new DoubleAnimation(0, target, dur) { BeginTime = delay });
+                double dx = kind == "slideLeft" ? -60 : kind == "slideRight" ? 60 : 0;
+                double dy = kind == "slideUp" ? 50 : kind == "slideDown" ? -50 : 0;
+                if (dx != 0) move.BeginAnimation(TranslateTransform.XProperty, new DoubleAnimation(dx, 0, dur) { BeginTime = delay, EasingFunction = ease });
+                if (dy != 0) move.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(dy, 0, dur) { BeginTime = delay, EasingFunction = ease });
+                if (kind == "zoom" || kind == "pop")
+                {
+                    IEasingFunction ef = kind == "pop" ? (IEasingFunction)new BackEase { EasingMode = EasingMode.EaseOut, Amplitude = 0.6 } : ease;
+                    scale.BeginAnimation(ScaleTransform.ScaleXProperty, new DoubleAnimation(kind == "pop" ? 0.6 : 0.85, 1, dur) { BeginTime = delay, EasingFunction = ef });
+                    scale.BeginAnimation(ScaleTransform.ScaleYProperty, new DoubleAnimation(kind == "pop" ? 0.6 : 0.85, 1, dur) { BeginTime = delay, EasingFunction = ef });
+                }
+            }
+
+            // зацикленные эффекты
+            var loop = anim.S("loop", "none");
+            var start = delay + (kind != "none" ? dur : TimeSpan.Zero);
+            var sine = new SineEase { EasingMode = EasingMode.EaseInOut };
+            if (loop == "pulse")
+            {
+                var a = new DoubleAnimation(1, 1.06, TimeSpan.FromMilliseconds(900)) { AutoReverse = true, RepeatBehavior = RepeatBehavior.Forever, BeginTime = start, EasingFunction = sine };
+                scale.BeginAnimation(ScaleTransform.ScaleXProperty, a);
+                scale.BeginAnimation(ScaleTransform.ScaleYProperty, a);
+            }
+            else if (loop == "float")
+                move.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(0, -8, TimeSpan.FromMilliseconds(1600)) { AutoReverse = true, RepeatBehavior = RepeatBehavior.Forever, BeginTime = start, EasingFunction = sine });
+            else if (loop == "spin")
+                rot.BeginAnimation(RotateTransform.AngleProperty, new DoubleAnimation(rotate, rotate + 360, TimeSpan.FromSeconds(6)) { RepeatBehavior = RepeatBehavior.Forever, BeginTime = start });
+            else if (loop == "blink")
+                fe.BeginAnimation(OpacityProperty, new DoubleAnimation(fe.Opacity, 0.35, TimeSpan.FromMilliseconds(700)) { AutoReverse = true, RepeatBehavior = RepeatBehavior.Forever, BeginTime = start });
+            else if (loop == "glow")
+            {
+                var fx = new DropShadowEffect { Color = T.Accent, BlurRadius = 24, ShadowDepth = 0, Opacity = 0 };
+                fe.Effect = fx;
+                fx.BeginAnimation(DropShadowEffect.OpacityProperty, new DoubleAnimation(0.1, 0.85, TimeSpan.FromMilliseconds(1100)) { AutoReverse = true, RepeatBehavior = RepeatBehavior.Forever, BeginTime = start, EasingFunction = sine });
+            }
+        }
+
+        MediaElement Video(string file, string fit, bool loop, bool muted)
+        {
+            var v = new MediaElement
+            {
+                Source = new Uri(file), LoadedBehavior = MediaState.Manual, UnloadedBehavior = MediaState.Stop, IsMuted = muted, Volume = muted ? 0 : 0.5,
+                Stretch = fit == "contain" ? Stretch.Uniform : fit == "fill" ? Stretch.Fill : Stretch.UniformToFill,
+            };
+            v.Loaded += delegate { v.Play(); };
+            if (loop) v.MediaEnded += delegate { v.Position = TimeSpan.Zero; v.Play(); };
+            screenMedia.Add(v);
+            return v;
+        }
+
+        FrameworkElement Slider(J p, J e)
+        {
+            var imgs = p.Strings("images").Select(Img).Where(x => x != null).ToList();
+            if (imgs.Count == 0) return null;
+            double w = e.N("w", 100), h = e.N("h", 40), r = Math.Max(0, p.N("radius"));
+            var g = new Grid { Clip = new RectangleGeometry(new Rect(0, 0, w, h), r, r), Tag = "i" };
+            var stretch = p.S("fit") == "contain" ? Stretch.Uniform : p.S("fit") == "fill" ? Stretch.Fill : Stretch.UniformToFill;
+            var a = new Image { Source = imgs[0], Stretch = stretch };
+            var b = new Image { Stretch = stretch, Opacity = 0 };
+            g.Children.Add(a);
+            g.Children.Add(b);
+            var index = 0;
+            var front = a;
+            var dots = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Bottom, Margin = new Thickness(0, 0, 0, 10) };
+            Action paintDots = delegate
+            {
+                dots.Children.Clear();
+                for (int i = 0; i < imgs.Count; i++)
+                    dots.Children.Add(new Ellipse { Width = 8, Height = 8, Margin = new Thickness(3, 0, 3, 0), Fill = i == index ? T.B(T.Accent) : T.B(Colors.White, 0.5) });
+            };
+            Action<int> go = delegate (int to)
+            {
+                index = (to + imgs.Count) % imgs.Count;
+                var back = front == a ? b : a;
+                back.Source = imgs[index];
+                var d = new Duration(TimeSpan.FromMilliseconds(T.Animations ? 500 : 1));
+                back.BeginAnimation(OpacityProperty, new DoubleAnimation(0, 1, d));
+                front.BeginAnimation(OpacityProperty, new DoubleAnimation(1, 0, d));
+                front = back;
+                paintDots();
+            };
+            if (p.B("dots", true) && imgs.Count > 1) { paintDots(); g.Children.Add(dots); }
+            if (p.B("arrows", true) && imgs.Count > 1)
+            {
+                foreach (var dir in new[] { -1, 1 })
+                {
+                    var d = dir;
+                    var arrow = new Border
+                    {
+                        Width = 34, Height = 34, CornerRadius = new CornerRadius(17), Background = T.B(Colors.Black, 0.45), Margin = new Thickness(10, 0, 10, 0),
+                        HorizontalAlignment = d < 0 ? HorizontalAlignment.Left : HorizontalAlignment.Right, VerticalAlignment = VerticalAlignment.Center,
+                        Child = new Path { Data = Geometry.Parse(d < 0 ? "M 13,6 L 7,12 L 13,18" : "M 9,6 L 15,12 L 9,18"), Stroke = Brushes.White, StrokeThickness = 2, Width = 22, Height = 24,
+                            Stretch = Stretch.None, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center },
+                    };
+                    Clickable(arrow, delegate { go(index + d); });
+                    g.Children.Add(arrow);
+                }
+            }
+            if (imgs.Count > 1 && !snapshotMode)
+            {
+                var timer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(Math.Max(1, p.N("interval", 4))) };
+                timer.Tick += delegate { go(index + 1); };
+                timer.Start();
+                screenTimers.Add(timer);
+            }
+            return g;
+        }
+
+        static readonly Dictionary<string, string> SocialIcons = new Dictionary<string, string>
+        {
+            { "telegram", "M 3,11 L 20,4 L 17,20 L 11,15 L 9,19 L 8,13 Z M 8,13 L 17,7" },
+            { "youtube", "M 4,7 Q 4,5 6,5 H 18 Q 20,5 20,7 V 17 Q 20,19 18,19 H 6 Q 4,19 4,17 Z M 10,9 L 15,12 L 10,15 Z" },
+            { "site", "M 12,3 A 9,9 0 1 0 12.01,3 Z M 3,12 H 21 M 12,3 Q 7,12 12,21 Q 17,12 12,3" },
+            { "discord", "M 7,7 Q 12,5 17,7 Q 20,12 19,17 Q 17,18.5 15,19 L 14,17 Q 12,17.6 10,17 L 9,19 Q 7,18.5 5,17 Q 4,12 7,7 Z M 9.5,12.5 A 1,1 0 1 0 9.51,12.5 M 14.5,12.5 A 1,1 0 1 0 14.51,12.5" },
+            { "twitch", "M 5,4 H 20 V 14 L 15,19 H 11 L 8,22 V 19 H 5 Z M 11,8 V 12 M 15,8 V 12" },
+            { "vk", "M 4,8 Q 6,16 12,16 V 12 Q 15,12 16,15 H 19 Q 17,11 15,10.5 Q 17,9 18,7 H 15 Q 14,10 12,10.5 V 7 H 9 V 13 Q 7,12 7,8 Z" },
+            { "boosty", "M 9,4 L 6,13 H 11 L 9,20 L 18,10 H 13 L 16,4 Z" },
+        };
+
+        FrameworkElement Social(J p)
+        {
+            var sp = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
+            var size = p.N("size", 40);
+            foreach (var link in p.A("links"))
+            {
+                var url = link.S("url");
+                var kind = link.S("kind", "site");
+                string geo;
+                if (!SocialIcons.TryGetValue(kind, out geo)) geo = SocialIcons["site"];
+                var b = new Border
+                {
+                    Width = size, Height = size, CornerRadius = new CornerRadius(p.B("round", true) ? size / 2 : size / 5), Margin = new Thickness(0, 0, p.N("gap", 10), 0),
+                    Background = T.B(T.C(p.S("fill"), "@card")), BorderBrush = T.B(T.Border), BorderThickness = new Thickness(1),
+                    Child = new Path { Data = Geometry.Parse(geo), Stroke = T.B(T.C(p.S("color"), "@text")), StrokeThickness = 1.6, Width = 24, Height = 24, Stretch = Stretch.None,
+                        StrokeLineJoin = PenLineJoin.Round, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center },
+                    ToolTip = kind,
+                };
+                Clickable(b, delegate { Do("url", url); });
+                sp.Children.Add(b);
+            }
+            return new Grid { Children = { sp } };
+        }
+
+        bool LicenseRequired()
+        {
+            foreach (var key in T.Layout.O("screens").Raw.Keys)
+                foreach (var e in ScreenDef(key).A("elements"))
+                    if (e.S("type") == "license" && !e.B("hidden") && e.O("props").B("required", true)) return true;
+            return false;
+        }
+
+        FrameworkElement License(J p)
+        {
+            var g = new Grid();
+            g.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+            g.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            var t = Text(p.S("text"), 12.5, null, T.Text, true);
+            t.Opacity = 0.85;
+            g.Children.Add(new ScrollViewer { Content = t, VerticalScrollBarVisibility = ScrollBarVisibility.Auto, Tag = "i" });
+            var check = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 12, 0, 0) };
+            check.Children.Add(Indicator(false, licenseAccepted, 20));
+            var l = Text(p.S("label", "Я принимаю условия"), 13, FontWeights.SemiBold);
+            l.Margin = new Thickness(10, 0, 0, 0);
+            l.VerticalAlignment = VerticalAlignment.Center;
+            check.Children.Add(l);
+            Clickable(check, delegate { licenseAccepted = !licenseAccepted; ShowScreen(screen); });
+            Grid.SetRow(check, 1);
+            g.Children.Add(check);
+            return Box(g, new Thickness(16));
+        }
+
+        FrameworkElement Presets(J p)
+        {
+            if (M.Presets.Count == 0) return null;
+            var wp = new WrapPanel { VerticalAlignment = VerticalAlignment.Center };
+            var title = Text(p.S("title", "Набор:"), 13, FontWeights.SemiBold, T.Muted);
+            title.VerticalAlignment = VerticalAlignment.Center;
+            title.Margin = new Thickness(0, 0, 10, 0);
+            wp.Children.Add(title);
+            Action<string, string, Action> chip = delegate (string id, string label, Action apply)
+            {
+                var on = activePreset == id;
+                var c = new Border
+                {
+                    CornerRadius = new CornerRadius(16), Padding = new Thickness(14, 7, 14, 7), Margin = new Thickness(0, 0, 8, 0),
+                    Background = on ? T.B(T.Accent) : T.B(T.Card, T.SurfaceOpacity), BorderBrush = on ? T.B(T.Accent) : T.B(T.Border), BorderThickness = new Thickness(1),
+                    Child = Text(label, 13, FontWeights.SemiBold, on ? T.AccentText : T.Text),
+                };
+                Clickable(c, delegate { activePreset = id; apply(); ShowScreen(screen); });
+                wp.Children.Add(c);
+            };
+            chip(null, "Рекомендуемый", ResetDefaults);
+            foreach (var pr in M.Presets)
+            {
+                var preset = pr;
+                chip(pr.Id, pr.Name, delegate { foreach (var n in M.Mods()) n.Selected = preset.Mods.Contains(n.Id); });
+            }
+            return new Grid { Children = { wp } };
         }
 
         // ---------- виджеты ----------
@@ -1006,6 +1384,7 @@ namespace ModPackInstaller
             if (Mode == "preview") { ProgressDemo(); return; }
             if (gameVersion == null) { Alert("Игра не найдена", "Укажите папку, где установлен «Мир танков»."); PickFolder(); return; }
             if (!M.Mods().Any(n => n.Selected)) { Alert("Ничего не выбрано", "Отметьте хотя бы один мод."); return; }
+            if (LicenseRequired() && !licenseAccepted) { Alert("Нужно согласие", "Примите условия соглашения, чтобы продолжить установку."); return; }
             if (Process.GetProcessesByName("WorldOfTanks").Any())
             {
                 Alert("Игра запущена", "Закройте «Мир танков» перед установкой модов, иначе файлы могут не замениться.");
@@ -1159,6 +1538,7 @@ namespace ModPackInstaller
         public void Snapshot(string file, string screenName)
         {
             T.Animations = false;
+            snapshotMode = true;
             if (screenName == "changelog") { ShowScreen("welcome"); ShowChangelog(); }
             else ShowScreen(screenName);
             if (screenName == "progress")

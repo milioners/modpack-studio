@@ -237,12 +237,31 @@ function manifestAndEntries(projectDir, project, assets, includeMods) {
     }
     return layoutImg.get(rel);
   };
+  // Видео и звуки не перекодируются — кладутся как есть
+  const media = new Map();
+  const mapMedia = (rel) => {
+    if (!rel) return null;
+    const abs = path.resolve(projectDir, rel);
+    if (!abs.startsWith(path.resolve(projectDir) + path.sep) || !fs.existsSync(abs)) return null;
+    if (!media.has(rel)) {
+      const name = `media/m${media.size}${path.extname(rel).toLowerCase()}`;
+      entries.push({ name, file: abs });
+      media.set(rel, name);
+    }
+    return media.get(rel);
+  };
   const lay = JSON.parse(JSON.stringify(th.layout));
   for (const sc of Object.values(lay.screens)) {
     sc.background.image = sc.background.image ? mapImg(sc.background.image) : null;
-    for (const e of sc.elements) if (e.type === 'image') e.props.src = mapImg(e.props.src);
+    sc.background.video = mapMedia(sc.background.video);
+    for (const e of sc.elements) {
+      if (e.type === 'image') e.props.src = mapImg(e.props.src);
+      if (e.type === 'video') e.props.src = mapMedia(e.props.src);
+      if (e.type === 'slider') e.props.images = (e.props.images || []).map(mapImg).filter(Boolean);
+    }
   }
   theme.layout = lay;
+  theme.media = { ...th.media, music: mapMedia(th.media?.music), clickSound: mapMedia(th.media?.clickSound) };
   const conv = (n) => {
     if (n.type === 'group') {
       return { id: n.id, type: 'group', name: n.name, description: n.description, mode: n.mode, checked: n.checked,
@@ -263,6 +282,7 @@ function manifestAndEntries(projectDir, project, assets, includeMods) {
     options: { cleanDefault: project.options.cleanDefault, launchGame: project.options.launchGame },
     update: project.publish,
     changelog: project.options.showChangelog ? project.changelog.filter((e) => e.text.trim()) : [],
+    presets: project.presets || [],
     theme,
     tree,
   };

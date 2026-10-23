@@ -28,6 +28,10 @@ contextBridge.exposeInMainWorld('api', {
   installerSnapshot: call('installer:snapshot'),
   layoutMeta: call('layout:meta'),
   layoutTemplate: call('layout:template'),
+  pickMedia: call('media:pick'),
+  mediaUrl: call('media:url'),
+  exportDesign: call('design:export'),
+  importDesign: call('design:import'),
   installerPreview: call('installer:preview'),
   publishGithub: call('publish:github'),
 

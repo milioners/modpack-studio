@@ -1,8 +1,10 @@
 // Раскладка окна установщика: экраны и элементы со свободными координатами (как в Figma).
 //
-// layout = { version, window: { width, height, radius }, screens: { welcome, mods, progress, finish, manage } }
-// screen = { enabled, background: { color, image, dim, blur }, elements: [element] } — порядок = слои снизу вверх
-// element = { id, type, name, x, y, w, h, opacity, hidden, locked, showIf, props }
+// layout = { version, window: { width, height, radius }, screens: { welcome, mods, progress, finish, manage, custom_… } }
+// screen = { enabled, name, background: { color, image, video, dim, blur }, elements: [element] } — порядок = слои снизу вверх
+// element = { id, type, name, x, y, w, h, opacity, hidden, locked, showIf, rotate, group, anim, hover, props }
+//   anim  = { in: none|fade|slideLeft|slideRight|slideUp|slideDown|zoom|pop, delay, duration, loop: none|pulse|float|glow|spin|blink }
+//   hover = { scale, glow, lift }
 //
 // Цвета: '#rrggbb' / '#aarrggbb' или ссылка на палитру темы: @bg @surface @card @border @text @muted @accent @accentText @danger @success.
 // Шрифты: имя шрифта или @font / @titleFont. Картинки: путь проекта (images/…) или @logo / @banner.
@@ -15,10 +17,17 @@ const SCREEN_NAMES = { welcome: 'Приветствие', mods: 'Выбор мо
 
 // Типы элементов: название, размер по умолчанию, свойства по умолчанию
 const TYPES = {
-  text: { name: 'Текст', w: 320, h: 40, props: { text: 'Новый текст', font: '@font', size: 16, weight: 'normal', color: '@text', align: 'left', valign: 'top', italic: false, shadow: false, lineHeight: 0 } },
+  text: { name: 'Текст', w: 320, h: 40, props: { text: 'Новый текст', font: '@font', size: 16, weight: 'normal', color: '@text', fill2: '', angle: 0, align: 'left', valign: 'top', italic: false, shadow: false, lineHeight: 0, spacing: 0, upper: false } },
   image: { name: 'Картинка', w: 320, h: 180, props: { src: null, fit: 'cover', radius: 12, border: '@border', borderWidth: 0 } },
-  shape: { name: 'Фигура', w: 240, h: 140, props: { fill: '@surface', fill2: '', angle: 90, border: '@border', borderWidth: 1, radius: 12, shadow: false } },
-  button: { name: 'Кнопка', w: 180, h: 46, props: { label: 'Кнопка', action: 'go:mods', url: '', fill: '@accent', color: '@accentText', border: '@accent', borderWidth: 0, radius: 9, size: 14, weight: 'bold', glow: true } },
+  shape: { name: 'Фигура', w: 240, h: 140, props: { fill: '@surface', fill2: '', angle: 90, border: '@border', borderWidth: 1, radius: 12, shadow: false, frosted: 0 } },
+  button: { name: 'Кнопка', w: 180, h: 46, props: { label: 'Кнопка', action: 'go:mods', url: '', fill: '@accent', color: '@accentText', border: '@accent', borderWidth: 0, radius: 9, size: 14, weight: 'bold', glow: true, hoverFill: '', hoverColor: '', icon: '' } },
+  video: { name: 'Видео', w: 480, h: 270, props: { src: null, fit: 'cover', radius: 12, loop: true, muted: true } },
+  slider: { name: 'Слайдер картинок', w: 480, h: 270, props: { images: [], interval: 4, fit: 'cover', radius: 12, arrows: true, dots: true } },
+  social: { name: 'Соцсети', w: 220, h: 44, props: { links: [{ kind: 'discord', url: '' }, { kind: 'telegram', url: '' }, { kind: 'youtube', url: '' }], size: 40, gap: 10, fill: '@card', color: '@text', round: true } },
+  stat: { name: 'Счётчик', w: 160, h: 80, props: { value: '{modsCount}', label: 'модов в сборке', valueSize: 36, color: '@accent', labelColor: '@muted', align: 'left' } },
+  license: { name: 'Соглашение', w: 520, h: 260, props: { text: 'Устанавливая модпак, вы соглашаетесь использовать только разрешённые модификации.', label: 'Я принимаю условия', required: true } },
+  presets: { name: 'Наборы модов', w: 520, h: 44, props: { title: 'Набор:' } },
+  musicbtn: { name: 'Кнопка музыки', w: 40, h: 40, props: { fill: '@card', color: '@text', radius: 20 } },
   modlist: { name: 'Список модов', w: 680, h: 500, props: { layout: 'grid', cardSize: 'm', categories: 'tabs', search: true } },
   moddetail: { name: 'Описание мода', w: 330, h: 500, props: {} },
   gamecard: { name: 'Папка игры', w: 360, h: 150, props: {} },
@@ -32,20 +41,29 @@ const ACTIONS = {
   'go:welcome': 'Экран приветствия', 'go:mods': 'Экран выбора модов', install: 'Установить выбранное', installDefaults: 'Установить рекомендуемое',
   update: 'Обновить модпак', checkUpdate: 'Проверить обновления', changelog: 'Показать «Что нового»', pickFolder: 'Выбрать папку игры',
   launchGame: 'Запустить игру', openFolder: 'Открыть папку игры', url: 'Открыть ссылку', uninstall: 'Удалить модпак', close: 'Закрыть окно', minimize: 'Свернуть окно',
+  toggleMusic: 'Включить / выключить музыку',
 };
+
+const ANIM_IN = { none: 'Нет', fade: 'Проявление', slideLeft: 'Выезд слева', slideRight: 'Выезд справа', slideUp: 'Выезд снизу', slideDown: 'Выезд сверху', zoom: 'Увеличение', pop: 'Пружина' };
+const ANIM_LOOP = { none: 'Нет', pulse: 'Пульсация', float: 'Покачивание', glow: 'Мерцание свечения', spin: 'Вращение', blink: 'Мигание' };
+const SOCIAL = { discord: 'Discord', telegram: 'Telegram', vk: 'ВКонтакте', youtube: 'YouTube', twitch: 'Twitch', boosty: 'Boosty', site: 'Сайт' };
 
 const SHOW_IF = {
   always: 'Всегда', updateAvailable: 'Есть обновление модпака', noUpdate: 'Обновления нет', hasUpdateSource: 'Обновления настроены',
   gameFound: 'Игра найдена', gameMissing: 'Игра не найдена', installed: 'Модпак уже установлен', notInstalled: 'Модпак не установлен',
   changelog: 'Есть «Что нового»', hasLaunch: 'Можно запустить игру', hasWelcome: 'Включён экран приветствия', hasBanner: 'Есть баннер',
+  hasMusic: 'Есть музыка', hasPresets: 'Есть наборы модов',
 };
 
 let seq = 0;
 const nid = () => `e${Date.now().toString(36)}${(seq++).toString(36)}`;
 
+const ANIM = () => ({ in: 'none', delay: 0, duration: 450, loop: 'none' });
+const HOVER = () => ({ scale: 1, glow: false, lift: 0 });
+
 function el(type, x, y, w, h, props = {}, extra = {}) {
   return { id: nid(), type, name: extra.name || TYPES[type].name, x, y, w, h, opacity: 1, hidden: false, locked: false, showIf: 'always',
-    ...extra, props: { ...TYPES[type].props, ...props } };
+    rotate: 0, group: null, anim: ANIM(), hover: HOVER(), ...extra, props: { ...JSON.parse(JSON.stringify(TYPES[type].props)), ...props } };
 }
 
 // Шапка: логотип, название, версия, кнопка обновления, свернуть/закрыть
@@ -60,7 +78,7 @@ function header(W) {
 }
 
 function bg(color = '@bg', extra = {}) {
-  return { color, image: null, dim: 0.6, blur: 6, ...extra };
+  return { color, image: null, video: null, dim: 0.6, blur: 6, ...extra };
 }
 
 // Шаблоны раскладки. palette — для ориентира (шаблоны используют ссылки на палитру)
@@ -139,6 +157,7 @@ function template(name = 'classic', size = {}) {
   ] };
 
   if (hero) s.welcome.background = bg('@bg', { image: null, dim: 0.35, blur: 0 });
+  for (const k of SCREENS) s[k].name = SCREEN_NAMES[k];
   return { version: 1, template: name, window: { width: W, height: H, radius: 14 }, screens: s };
 }
 
@@ -149,15 +168,20 @@ function normalizeLayout(layout) {
   if (!layout || !layout.screens) return template('classic');
   const out = { version: 1, template: layout.template || 'custom', window: { width: 1100, height: 700, radius: 14, ...layout.window }, screens: {} };
   const base = template('classic', out.window);
-  for (const sc of SCREENS) {
+  // свои экраны: custom_<id>, у них есть название
+  const keys = [...SCREENS, ...Object.keys(layout.screens).filter((k) => /^custom_[\w-]+$/.test(k))];
+  for (const sc of keys) {
     const src = layout.screens[sc] || base.screens[sc];
     out.screens[sc] = {
       enabled: src.enabled !== false,
+      name: sc.startsWith('custom_') ? String(src.name || 'Свой экран') : SCREEN_NAMES[sc],
       background: { ...bg(), ...src.background },
       elements: (src.elements || []).filter((e) => TYPES[e.type]).map((e) => ({
         ...e, id: e.id || nid(), name: e.name || TYPES[e.type].name, opacity: e.opacity ?? 1, showIf: SHOW_IF[e.showIf] ? e.showIf : 'always',
         x: Math.round(e.x || 0), y: Math.round(e.y || 0), w: Math.max(8, Math.round(e.w || 8)), h: Math.max(8, Math.round(e.h || 8)),
-        props: { ...TYPES[e.type].props, ...e.props },
+        rotate: Number(e.rotate) || 0, group: e.group || null,
+        anim: { ...ANIM(), ...e.anim }, hover: { ...HOVER(), ...e.hover },
+        props: { ...JSON.parse(JSON.stringify(TYPES[e.type].props)), ...e.props },
       })),
     };
   }
@@ -171,9 +195,27 @@ function layoutImages(layout) {
     const s = layout?.screens?.[sc];
     if (!s) continue;
     if (s.background?.image) out.push(s.background.image);
-    for (const e of s.elements) if (e.type === 'image' && e.props.src && !e.props.src.startsWith('@')) out.push(e.props.src);
+    for (const e of s.elements) {
+      if (e.type === 'image' && e.props.src && !e.props.src.startsWith('@')) out.push(e.props.src);
+      if (e.type === 'slider') out.push(...(e.props.images || []));
+    }
   }
   return out;
 }
 
-module.exports = { SCREENS, SCREEN_NAMES, TYPES, ACTIONS, SHOW_IF, TEMPLATES, template, normalizeLayout, layoutImages };
+// Видео и звуки раскладки — пакуются в установщик как есть
+function layoutMedia(layout) {
+  const out = [];
+  for (const s of Object.values(layout?.screens || {})) {
+    if (s.background?.video) out.push(s.background.video);
+    for (const e of s.elements) if (e.type === 'video' && e.props.src) out.push(e.props.src);
+  }
+  return out;
+}
+
+// Все экраны раскладки по порядку, со своими экранами в конце
+function screenKeys(layout) {
+  return [...SCREENS, ...Object.keys(layout?.screens || {}).filter((k) => k.startsWith('custom_'))];
+}
+
+module.exports = { SCREENS, SCREEN_NAMES, TYPES, ACTIONS, SHOW_IF, ANIM_IN, ANIM_LOOP, SOCIAL, TEMPLATES, template, normalizeLayout, layoutImages, layoutMedia, screenKeys };
