@@ -1,12 +1,13 @@
 // Мост между интерфейсом и главным процессом: только перечисленные вызовы, без доступа к Node.
 'use strict';
 
-const { contextBridge, ipcRenderer, webUtils } = require('electron');
+const { contextBridge, ipcRenderer, webUtils, webFrame } = require('electron');
 
 const call = (channel) => (...args) => ipcRenderer.invoke(channel, ...args);
 
 contextBridge.exposeInMainWorld('api', {
   getState: call('state:get'),
+  setZoom: (factor) => webFrame.setZoomFactor(factor),
   newProject: call('project:new'),
   openProject: call('project:open'),
   demoProject: call('project:demo'),

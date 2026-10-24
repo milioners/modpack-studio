@@ -1,4 +1,4 @@
-// Главный процесс ModPack Studio: окно, проекты, файлы, сборка. Интерфейс общается через IPC (preload.js).
+// Главный процесс TankAir Studio: окно, проекты, файлы, сборка. Интерфейс общается через IPC (preload.js).
 'use strict';
 
 const { app, BrowserWindow, ipcMain, dialog, shell, net } = require('electron');
@@ -29,7 +29,9 @@ const OPENABLE_RE = /\.(mtmod|wotmod|zip)$/i;
 const MIME = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif', '.svg': 'image/svg+xml', '.bmp': 'image/bmp' };
 
 let win;
-const SETTINGS_DEFAULTS = { recent: [], autoUpdate: true, catalogUrl: '' };
+// ui — оформление самой студии: тема, обои, стекло, масштаб, анимации
+const UI_DEFAULTS = { theme: 'tactic', wallpaper: 'gradient', glass: true, scale: 100, animations: true };
+const SETTINGS_DEFAULTS = { recent: [], autoUpdate: true, catalogUrl: '', ui: UI_DEFAULTS };
 let settings = { ...SETTINGS_DEFAULTS };
 let current = null; // { dir, data }
 let pendingFile = null;
@@ -40,6 +42,18 @@ function loadSettings() {
   try {
     settings = { ...SETTINGS_DEFAULTS, ...JSON.parse(fs.readFileSync(settingsFile(), 'utf8')) };
   } catch { /* первый запуск */ }
+  settings.ui = { ...UI_DEFAULTS, ...settings.ui };
+}
+
+// До 1.4 программа называлась ModPack Studio: переносим её настройки, недавние проекты и кэш установщика
+function migrateUserData() {
+  const old = path.join(app.getPath('appData'), 'ModPack Studio');
+  const cur = app.getPath('userData');
+  if (old === cur || fs.existsSync(path.join(cur, 'settings.json')) || !fs.existsSync(path.join(old, 'settings.json'))) return;
+  try {
+    fs.mkdirSync(cur, { recursive: true });
+    for (const f of ['settings.json', 'catalog-cache.json']) if (fs.existsSync(path.join(old, f))) fs.copyFileSync(path.join(old, f), path.join(cur, f));
+  } catch { /* начнём с чистых настроек */ }
 }
 
 function saveSettings() {
@@ -64,7 +78,7 @@ function state() {
   const recent = settings.recent.map((r) => ({ ...r, exists: fs.existsSync(path.join(r.dir, project.PROJECT_FILE)) }));
   return {
     appVersion: app.getVersion(), recent, project: projectState(), iscc: inno.findIscc(), packaged: app.isPackaged,
-    app: { autoUpdate: settings.autoUpdate, catalogUrl: settings.catalogUrl, defaultCatalogUrl: defaultCatalogUrl(), updateRepo: updater.repo() },
+    app: { autoUpdate: settings.autoUpdate, catalogUrl: settings.catalogUrl, defaultCatalogUrl: defaultCatalogUrl(), updateRepo: updater.repo(), ui: settings.ui },
   };
 }
 
@@ -175,7 +189,7 @@ async function nodeFromCatalog(dir, m) {
   }
 }
 
-// ---------- свой установщик (ModPack Installer) ----------
+// ---------- свой установщик (TankAir Installer) ----------
 
 const stubCache = () => path.join(app.getPath('userData'), 'installer-cache');
 
@@ -307,7 +321,7 @@ function registerIpc() {
     if (!dir) {
       const r = await dialog.showOpenDialog(win, {
         title: 'Открыть проект модпака', properties: ['openFile'],
-        filters: [{ name: 'Проект ModPack Studio', extensions: ['json'] }],
+        filters: [{ name: 'Проект TankAir Studio', extensions: ['json'] }],
       });
       if (r.canceled || !r.filePaths[0]) return null;
       dir = path.dirname(r.filePaths[0]);
@@ -316,7 +330,7 @@ function registerIpc() {
   });
   handle('project:demo', () => {
     const docs = !app.isPackaged && process.env.MPS_DOCS ? process.env.MPS_DOCS : app.getPath('documents');
-    const parent = path.join(docs, 'ModPack Studio');
+    const parent = path.join(docs, 'TankAir Studio');
     fs.mkdirSync(parent, { recursive: true });
     const dir = uniqueDir(parent, 'Демо-модпак');
     createDemo(dir, DEMO_CATALOG);
@@ -486,6 +500,7 @@ function registerIpc() {
 
   handle('app:settings', (patch) => {
     for (const k of ['autoUpdate', 'catalogUrl']) if (patch[k] !== undefined) settings[k] = patch[k];
+    if (patch.ui) settings.ui = { ...UI_DEFAULTS, ...settings.ui, ...patch.ui };
     if (patch.catalogUrl !== undefined) catalogCache = null;
     saveSettings();
     return state();
@@ -533,7 +548,7 @@ function registerIpc() {
     const cur = accept(data);
     const r = await dialog.showSaveDialog(win, {
       title: 'Сохранить дизайн установщика', defaultPath: path.join(app.getPath('desktop'), `${inno.safeName(cur.data.info.name)}.mpsdesign`),
-      filters: [{ name: 'Дизайн ModPack Studio', extensions: ['mpsdesign'] }],
+      filters: [{ name: 'Дизайн TankAir Studio', extensions: ['mpsdesign'] }],
     });
     if (r.canceled) return null;
     const { installer, design } = cur.data;
@@ -549,14 +564,14 @@ function registerIpc() {
     return r.filePath;
   });
   handle('design:import', async (data) => {
-    const r = await dialog.showOpenDialog(win, { title: 'Открыть дизайн установщика', properties: ['openFile'], filters: [{ name: 'Дизайн ModPack Studio', extensions: ['mpsdesign'] }] });
+    const r = await dialog.showOpenDialog(win, { title: 'Открыть дизайн установщика', properties: ['openFile'], filters: [{ name: 'Дизайн TankAir Studio', extensions: ['mpsdesign'] }] });
     if (r.canceled || !r.filePaths[0]) return null;
     const cur = accept(data);
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mps-design-'));
     try {
       importer.extractZip(r.filePaths[0], tmp);
       const d = JSON.parse(fs.readFileSync(path.join(tmp, 'design.json'), 'utf8'));
-      if (d.format !== 'mps-design') throw new Error('Это не файл дизайна ModPack Studio');
+      if (d.format !== 'mps-design') throw new Error('Это не файл дизайна TankAir Studio');
       // только картинки и звуки/видео, только из папок images/ и media/
       for (const sub of ['images', 'media']) {
         const src = path.join(tmp, sub);
@@ -645,6 +660,7 @@ if (!app.requestSingleInstanceLock()) {
   });
   app.whenReady().then(() => {
     if (!app.isPackaged && process.env.MPS_USER_DATA) app.setPath('userData', process.env.MPS_USER_DATA);
+    else migrateUserData();
     loadSettings();
     pendingFile = fileFromArgv(process.argv);
     registerIpc();

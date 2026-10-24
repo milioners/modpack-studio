@@ -1,5 +1,5 @@
-// Автообновление ModPack Studio через GitHub Releases.
-// В релизе лежат ModPack-Studio-Setup-<версия>.exe и файл .sha256 с его контрольной суммой.
+// Автообновление TankAir Studio через GitHub Releases.
+// В релизе лежат TankAir-Studio-Setup-<версия>.exe и файл .sha256 с его контрольной суммой.
 // Обновление скачивается, проверяется и запускается тихо; установщик сам перезапускает программу.
 'use strict';
 
@@ -11,7 +11,8 @@ const path = require('path');
 const { spawn } = require('child_process');
 const online = require('../core/online');
 
-const SETUP_RE = /^ModPack-Studio-Setup-.+\.exe$/i;
+// TankAir-Studio-Setup-… (до 1.4 программа называлась ModPack Studio — старое имя тоже принимаем)
+const SETUP_RE = /^(TankAir|ModPack)-Studio-Setup-.+\.exe$/i;
 
 function repo() {
   return require('../../package.json').updateRepo || '';
@@ -22,7 +23,7 @@ async function check() {
   const r = repo();
   if (!r) throw new Error('Не указан репозиторий обновлений');
   const res = await net.fetch(`https://api.github.com/repos/${r}/releases/latest`, {
-    headers: { Accept: 'application/vnd.github+json', 'User-Agent': 'ModPack-Studio' },
+    headers: { Accept: 'application/vnd.github+json', 'User-Agent': 'TankAir-Studio' },
   });
   if (res.status === 404) return { available: false, current: app.getVersion(), noReleases: true };
   if (!res.ok) throw new Error(`GitHub ответил ${res.status}`);

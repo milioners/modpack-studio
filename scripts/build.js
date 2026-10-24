@@ -1,5 +1,5 @@
 // Сборка установщика программы: упаковка Electron → установщик Inno Setup.
-// Запуск: npm run dist   (результат: dist/ModPack-Studio-Setup-<версия>.exe)
+// Запуск: npm run dist   (результат: dist/TankAir-Studio-Setup-<версия>.exe)
 // DIST_DIR=<папка> — собрать в другую папку.
 'use strict';
 
@@ -61,7 +61,7 @@ async function main() {
 
   console.log('2/2 Сборка установщика Inno Setup…');
   const exeName = `${pkg.productName}.exe`;
-  const iss = `; Установщик ModPack Studio — сгенерирован scripts/build.js
+  const iss = `; Установщик TankAir Studio — сгенерирован scripts/build.js
 [Setup]
 AppId={{${APP_ID}}
 AppName=${pkg.productName}
@@ -78,7 +78,7 @@ PrivilegesRequiredOverridesAllowed=dialog
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 OutputDir=${DIST}
-OutputBaseFilename=ModPack-Studio-Setup-${pkg.version}
+OutputBaseFilename=TankAir-Studio-Setup-${pkg.version}
 SetupIconFile=${path.join(ROOT, 'build', 'icon.ico')}
 UninstallDisplayIcon={app}\\${exeName}
 UninstallDisplayName=${pkg.productName}
@@ -97,6 +97,12 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 [Files]
 Source: "${appDir}\\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
+; до 1.4 программа называлась ModPack Studio — убираем старый exe и ярлыки при обновлении
+[InstallDelete]
+Type: files; Name: "{app}\\ModPack Studio.exe"
+Type: filesandordirs; Name: "{autoprograms}\\ModPack Studio"
+Type: files; Name: "{autodesktop}\\ModPack Studio.lnk"
+
 [Icons]
 Name: "{group}\\${pkg.productName}"; Filename: "{app}\\${exeName}"
 Name: "{group}\\{cm:UninstallProgram,${pkg.productName}}"; Filename: "{uninstallexe}"
@@ -107,10 +113,10 @@ Filename: "{app}\\${exeName}"; Description: "{cm:LaunchProgram,${pkg.productName
 ; после тихого автообновления программа запускается снова
 Filename: "{app}\\${exeName}"; Flags: nowait runasoriginaluser; Check: WizardSilent
 `;
-  const issPath = path.join(DIST, 'ModPack-Studio.iss');
+  const issPath = path.join(DIST, 'TankAir-Studio.iss');
   fs.writeFileSync(issPath, '﻿' + iss, 'utf8');
   await compileIss(issPath, () => {}, iscc);
-  const setup = path.join(DIST, `ModPack-Studio-Setup-${pkg.version}.exe`);
+  const setup = path.join(DIST, `TankAir-Studio-Setup-${pkg.version}.exe`);
   console.log(`Готово: ${setup} (${(fs.statSync(setup).size / 1024 / 1024).toFixed(1)} МБ)`);
 }
 

@@ -204,7 +204,7 @@ async function appSettingsDialog() {
     ? (u.info.available ? `Доступна версия ${esc(u.info.version)}` : u.info.noReleases ? 'Релизов пока нет' : 'У вас последняя версия')
     : 'Ещё не проверялось';
   const r = await modal({
-    title: 'Настройки программы', sub: `ModPack Studio ${esc(S.st.appVersion)}`, ic: 'settings',
+    title: 'Настройки программы', sub: `TankAir Studio ${esc(S.st.appVersion)}`, ic: 'settings',
     body: `<div class="field"><span>Обновления программы</span>
         <label class="toggle"><input type="checkbox" name="autoUpdate" ${a.autoUpdate ? 'checked' : ''}><span class="track"></span><span>Проверять обновления при запуске</span></label>
         <div class="row-btns"><button class="btn sm" id="upd-check">${icon('refresh', 13)}Проверить сейчас</button><span class="hint-text" id="upd-status">${status}</span></div>
@@ -248,7 +248,7 @@ async function updateDialog() {
   const i = S.upd.info;
   if (!i?.available) return;
   const r = await modal({
-    title: `Доступна ModPack Studio ${i.version}`, sub: `У вас ${esc(i.current)} · ${fmtSize(i.size)}${i.publishedAt ? ` · ${fmtDate(i.publishedAt)}` : ''}`, ic: 'upload',
+    title: `Доступна TankAir Studio ${i.version}`, sub: `У вас ${esc(i.current)} · ${fmtSize(i.size)}${i.publishedAt ? ` · ${fmtDate(i.publishedAt)}` : ''}`, ic: 'upload',
     body: `<div class="notes">${esc(i.notes || 'Описание изменений не указано.')}</div>
       <div class="progress" id="upd-progress" hidden><div></div></div>
       <small class="hint-text">Программа скачает установщик, проверит его контрольную сумму, закроется, обновится и запустится снова. Проекты не затрагиваются.</small>`,

@@ -1,10 +1,10 @@
-// Выпуск новой версии ModPack Studio в GitHub Releases (оттуда её получит автообновление).
+// Выпуск новой версии TankAir Studio в GitHub Releases (оттуда её получит автообновление).
 //
 //   1. Поднимите "version" в package.json и опишите изменения в CHANGELOG.md (раздел «## <версия>»).
 //   2. node scripts/release.js           — соберёт установщик и покажет, что будет опубликовано
 //      node scripts/release.js --publish — соберёт и опубликует релиз v<версия> через GitHub CLI (gh)
 //
-// В релиз уходят ModPack-Studio-Setup-<версия>.exe и .sha256 с его контрольной суммой — без неё программа обновление не примет.
+// В релиз уходят TankAir-Studio-Setup-<версия>.exe и .sha256 с его контрольной суммой — без неё программа обновление не примет.
 'use strict';
 
 const fs = require('fs');
@@ -40,7 +40,7 @@ function notes() {
 function main() {
   if (!pkg.updateRepo) throw new Error('В package.json не указан updateRepo');
   const text = notes();
-  const setup = path.join(DIST, `ModPack-Studio-Setup-${pkg.version}.exe`);
+  const setup = path.join(DIST, `TankAir-Studio-Setup-${pkg.version}.exe`);
   // --no-build: опубликовать уже собранный установщик (например, если сборка шла на другой машине)
   if (process.argv.includes('--no-build')) {
     if (!fs.existsSync(setup)) throw new Error(`Нет собранного ${path.basename(setup)} — запустите без --no-build`);
@@ -61,7 +61,7 @@ function main() {
   // Черновик → загрузка файлов с повторами (большие файлы при плохой связи обрываются) → публикация.
   // Пока релиз черновик, программы его не видят, поэтому наполовину загруженный релиз никому не попадёт.
   const gh = (args) => execFileSync('gh', [...args, '--repo', pkg.updateRepo], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] });
-  gh(['release', 'create', tag, '--draft', '--target', 'main', '--title', `ModPack Studio ${pkg.version}`, '--notes-file', notesFile]);
+  gh(['release', 'create', tag, '--draft', '--target', 'main', '--title', `TankAir Studio ${pkg.version}`, '--notes-file', notesFile]);
   for (const file of [shaFile, setup]) {
     for (let attempt = 1; ; attempt++) {
       try {

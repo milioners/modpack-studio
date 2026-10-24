@@ -1,4 +1,4 @@
-// Интерфейс ModPack Studio — конструктора модпаков. Проект хранится здесь (S.proj),
+// Интерфейс TankAir Studio — конструктора модпаков. Проект хранится здесь (S.proj),
 // любое изменение сохраняется в главном процессе с небольшой задержкой.
 'use strict';
 
@@ -264,10 +264,12 @@ const confirmBox = (title, sub, label = 'Да', danger = false) => modal({
 
 function render() {
   document.body.classList.toggle('home-mode', !S.proj);
+  applyUi();
   renderSidebar();
   renderPage();
-  const center = $('#title-center');
-  center.innerHTML = S.proj ? `<span class="t-name">${esc(S.proj.info.name)}</span><span id="save-state" class="save-state ok">Сохранено</span>` : '';
+  $('#title-crumb').innerHTML = S.proj
+    ? `/&nbsp;<span class="t-name">${esc(S.proj.info.name)}</span><span id="save-state" class="save-state ok">Сохранено</span>` : 'конструктор модпаков';
+  $('#title-center').innerHTML = `<button class="title-search" data-act="palette">${icon('search', 14)}<span>Поиск модов, действий, настроек…</span><kbd>Ctrl K</kbd></button>`;
   renderTitleActions();
 }
 
@@ -278,7 +280,7 @@ function renderTitleActions() {
   const u = S.upd;
   const badge = u.info?.available
     ? `<button class="title-btn upd" data-act="update-open" title="Доступна новая версия">${icon('upload', 14)}Обновление ${esc(u.info.version)}</button>` : '';
-  el.innerHTML = `${badge}<button class="title-btn" data-act="app-settings" title="Настройки программы">${icon('settings', 15)}</button>`;
+  el.innerHTML = `${badge}<button class="title-btn" data-act="studio-look" title="Оформление студии">${icon('brush', 15)}</button><button class="title-btn" data-act="app-settings" title="Настройки программы">${icon('settings', 15)}</button>`;
 }
 
 function renderSidebar() {
@@ -288,22 +290,24 @@ function renderSidebar() {
     return;
   }
   const errs = S.check.errors.length;
-  const warns = S.check.warnings.length;
+  const upd = catalogUpdatesCount();
   const nav = [
-    ['tree', 'catalog', 'Состав модпака', `<span class="count">${S.stats.mods}</span>`],
-    ['catalog', 'search', 'Каталог модов', catalogUpdatesCount() ? `<span class="count upd">${catalogUpdatesCount()}</span>` : ''],
-    ['design', 'image', 'Оформление', ''],
+    ['overview', 'home', 'Обзор', ''],
+    ['tree', 'grid', 'Состав модпака', `<span class="count">${S.stats.mods}</span>`],
+    ['catalog', 'search', 'Каталог модов', upd ? `<span class="count upd">${upd}</span>` : ''],
+    ['design', 'brush', 'Оформление', ''],
     ['info', 'edit', 'Сведения', ''],
     ['build', 'build', 'Сборка', errs ? `<span class="count bad">${errs}</span>` : `<span class="count ok">${icon('check', 11)}</span>`],
   ];
-  sb.innerHTML = `<div class="nav-label">Модпак</div>
+  // карточка-подсказка внизу: самое важное, что стоит сделать
+  const tip = nextSteps()[0];
+  sb.innerHTML = `<button class="side-proj" data-act="nav" data-page="overview"><div class="mini-logo" id="side-logo"></div>
+      <div class="grow"><b>${esc(S.proj.info.name)}</b><small>версия ${esc(S.proj.info.version)} · ${nMods(S.stats.mods)}</small></div></button>
+    <div class="nav-label">Модпак</div>
     ${nav.map(([page, ic, label, extra]) => `<button class="nav-item ${S.page === page ? 'active' : ''}" data-act="nav" data-page="${page}">${icon(ic, 18)}<span>${label}</span>${extra}</button>`).join('')}
     <div class="spacer"></div>
-    <div class="game-card">
-      <div class="row"><div class="mini-logo" id="side-logo"></div><div class="grow"><div class="title">${esc(S.proj.info.name)}</div><div class="path">версия ${esc(S.proj.info.version)}${warns ? ` · ${warns} ${plural(warns, 'замечание', 'замечания', 'замечаний')}` : ''}</div></div></div>
-      <div class="path" style="margin-top:8px">${esc(S.dir)}</div>
-      <div class="actions"><button class="btn sm" data-act="open-dir">${icon('folder', 14)}Папка</button><button class="btn sm ghost" data-act="close-project">Закрыть</button></div>
-    </div>`;
+    ${tip ? `<button class="side-tip ${tip.kind}" data-act="${tip.act}" ${tip.attrs || ''}><b>${esc(tip.title)}</b><small>${esc(tip.text)}</small></button>` : ''}
+    <div class="side-foot"><button class="btn sm ghost" data-act="open-dir" title="${esc(S.dir)}">${icon('folder', 14)}Папка</button><button class="btn sm ghost" data-act="close-project">Закрыть</button></div>`;
   renderSideLogo();
 }
 
@@ -321,8 +325,9 @@ function renderPage() {
     page.innerHTML = pageHome();
     return;
   }
-  const pages = { tree: pageTree, catalog: pageCatalog, design: pageDesign, info: pageInfo, build: pageBuild };
-  page.innerHTML = pages[S.page]();
+  const pages = { overview: pageOverview, tree: pageTree, catalog: pageCatalog, design: pageDesign, info: pageInfo, build: pageBuild };
+  page.innerHTML = (pages[S.page] || pageOverview)();
+  if (S.page === 'overview') mountOverview();
   if (S.page === 'tree') {
     renderTree();
     renderInspector();
@@ -353,7 +358,7 @@ function pageHome() {
   return `<div class="home">
     <div class="hero">
       <div class="hero-logo">${LOGO.replace('width="26" height="26"', 'width="72" height="72"')}</div>
-      <h1>ModPack <span>Studio</span></h1>
+      <h1>TankAir <span>Studio</span></h1>
       <p>Конструктор модпаков для «Мира танков». Соберите свои моды в один красивый установщик —<br>с баннером, группами, превью и описанием каждого мода.</p>
       <div class="hero-actions">
         <button class="btn primary big" data-act="new-project">${icon('plus', 18)}Новый модпак</button>
@@ -390,7 +395,7 @@ async function newProjectDialog() {
   if (st) openState(st, 'tree');
 }
 
-function openState(st, page = 'tree') {
+function openState(st, page = 'overview') {
   S.st = st;
   applyProjectState(st.project);
   S.page = page;
@@ -411,8 +416,9 @@ function pageTree() {
     <div class="editor">
       <div class="panel tree-panel">
         <div class="tree-head"><span id="tree-stats">${statsLine()}</span><span class="grow"></span>
-          <button class="btn sm ghost" data-act="expand-all" title="Развернуть всё">${icon('plus', 14)}</button>
-          <button class="btn sm ghost" data-act="collapse-all" title="Свернуть всё">${icon('minus', 14)}</button>
+          <div class="view-switch"><button class="${S.view !== 'cards' ? 'on' : ''}" data-act="tree-view" data-view="list" title="Список с группами">${icon('list', 14)}</button><button class="${S.view === 'cards' ? 'on' : ''}" data-act="tree-view" data-view="cards" title="Витрина карточками">${icon('grid', 14)}</button></div>
+          ${S.view === 'cards' ? '' : `<button class="btn sm ghost" data-act="expand-all" title="Развернуть всё">${icon('plus', 14)}</button>
+          <button class="btn sm ghost" data-act="collapse-all" title="Свернуть всё">${icon('minus', 14)}</button>`}
           <button class="btn sm" data-act="preview-installer">${icon('play', 13)}Предпросмотр</button></div>
         <div id="tree" class="tree"></div>
       </div>
@@ -428,6 +434,11 @@ function renderTree() {
       <p>.mtmod, .wotmod, .zip-архивы или папки с модами. Картинка и readme из архива подхватятся автоматически.</p>
       <div style="display:flex;gap:8px;justify-content:center"><button class="btn primary" data-act="add-files">${icon('import', 16)}Выбрать файлы</button>
       <button class="btn" data-act="add-group">${icon('folder', 16)}Создать группу</button></div></div>`;
+    return;
+  }
+  if (S.view === 'cards') {
+    el.innerHTML = showcaseHtml();
+    hydrate(el);
     return;
   }
   const rows = [];
@@ -714,7 +725,7 @@ function pageInfo() {
         <div class="note">Если указана версия игры, установщик предупредит игрока, если у него другая версия клиента.</div></div>
       <div class="panel"><h2>Установка и сборка</h2><p class="sub">Как ведёт себя установщик</p>
         <div class="field" style="margin-bottom:16px"><span>Тип установщика</span><div class="segmented">
-          <button class="${o.installerType !== 'inno' ? 'on' : ''}" data-act="itype" data-val="mps">Свой дизайн (ModPack Installer)</button>
+          <button class="${o.installerType !== 'inno' ? 'on' : ''}" data-act="itype" data-val="mps">Свой дизайн (TankAir Installer)</button>
           <button class="${o.installerType === 'inno' ? 'on' : ''}" data-act="itype" data-val="inno">Классический Inno Setup</button></div>
           <small class="hint-text">${o.installerType !== 'inno' ? 'Полностью своё оформление, карточки модов с превью, кнопка «Обновить модпак». Ничего устанавливать не нужно — собирается встроенным в Windows компилятором.' : 'Стандартное окно мастера установки. Нужен Inno Setup 6.'}</small></div>
         <label class="toggle"><input type="checkbox" data-obind-check="cleanDefault" ${o.cleanDefault ? 'checked' : ''}><span class="track"></span><span>Предлагать убрать старые моды перед установкой</span></label>
@@ -732,15 +743,24 @@ function pageInfo() {
 
 // ---------- сборка ----------
 
+// Этапы сборки: по ним рисуются кольцо прогресса и список шагов
+const BUILD_STAGES = [
+  ['Проверка проекта', 'моды, файлы, оформление'],
+  ['Оформление установщика', 'картинки, превью, экраны'],
+  ['Упаковка модов', 'сжатие и сборка .exe'],
+  ['Контрольная сумма и update.json', 'для кнопки «Обновить модпак»'],
+];
+
 function pageBuild() {
   const { errors, warnings } = S.check;
   const b = S.build;
-  const st = S.stats;
-  const tile = (ic, n, label) => `<div class="stat"><div class="ico-wrap">${icon(ic, 20)}</div><div><b>${n}</b><small>${label}</small></div></div>`;
   return `${head('Сборка установщика', 'Один .exe-файл: игрок запускает его, выбирает моды и получает их в своей игре.')}
     ${S.st.iscc || isMps() ? '' : `<div class="banner bad">${icon('alert', 22)}<div class="grow"><b>Inno Setup 6 не найден</b><small>Установите его: <code>winget install JRSoftware.InnoSetup</code></small></div>
       <button class="btn sm" data-act="external" data-url="https://jrsoftware.org/isdl.php">${icon('external', 14)}Скачать</button><button class="btn sm" data-act="recheck">${icon('refresh', 14)}Проверить снова</button></div>`}
-    <div class="stats">${tile('catalog', st.mods, plural(st.mods, 'мод', 'мода', 'модов'))}${tile('folder', st.groups, plural(st.groups, 'группа', 'группы', 'групп'))}${tile('file', st.files, plural(st.files, 'файл', 'файла', 'файлов'))}${tile('build', fmtSize(st.size), 'до сжатия')}</div>
+    <div class="build-top">
+      <div class="panel build-card" id="build-card">${buildCardHtml()}</div>
+      <div class="panel release-card" id="release-card">${releaseCardHtml()}</div>
+    </div>
     ${versionPanel()}
     <div class="build-grid">
       <div class="panel">
@@ -750,35 +770,85 @@ function pageBuild() {
           ${warnings.map((w) => `<div class="chk warn">${icon('info', 16)}<span>${esc(w)}</span></div>`).join('')}
           ${!errors.length && !warnings.length ? `<div class="chk ok">${icon('installed', 16)}<span>Ошибок и замечаний нет</span></div>` : ''}
         </div>
-        <div style="margin-top:18px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-          <button class="btn primary big" data-act="build" ${(!isMps() && !S.st.iscc) || b.running || errors.length ? 'disabled' : ''}>
-            ${b.running ? '<span class="spinner"></span>Собираю…' : `${icon('build', 18)}Собрать установщик`}</button>
-          <button class="btn big" data-act="preview-installer">${icon('play', 16)}Предпросмотр</button>
-        </div>
-        ${b.log.length ? `<h4 class="sect">Журнал</h4><div class="console" id="console">${b.log.map((l) => `<div class="${/ошибк|error/i.test(l) ? 'err' : ''}">${esc(l)}</div>`).join('')}</div>` : ''}
+        ${b.log.length ? `<details class="log-box" ${b.running ? 'open' : ''}><summary>Журнал сборки · ${b.log.length}</summary><div class="console" id="console">${b.log.map((l) => `<div class="${/ошибк|error/i.test(l) ? 'err' : ''}">${esc(l)}</div>`).join('')}</div></details>` : ''}
       </div>
       <div class="panel">
-        <h2>Результат</h2><p class="sub">Папка: ${esc(S.proj.options.outputDir || `${S.dir}\\output`)}</p>
-        ${b.result ? `<div class="result"><div class="ico-wrap">${icon('installed', 24)}</div><div class="grow"><b>Установщик готов · ${fmtSize(b.result.size)}</b><div class="path">${esc(b.result.exePath)}</div></div></div>
-          <div class="row-btns" style="margin-top:12px"><button class="btn primary" data-act="run-installer">${icon('play', 14)}Запустить установщик</button>
-          <button class="btn" data-act="show-result">${icon('folder', 14)}Показать в папке</button></div>`
-    : `<div class="empty small"><div class="big">${icon('build', 24)}</div><p>Здесь появится готовый .exe</p></div>`}
-        <h4 class="sect">История сборок</h4>
+        <h2>История сборок</h2><p class="sub">Папка: ${esc(S.proj.options.outputDir || `${S.dir}\\output`)}</p>
         ${buildHistory()}
       </div>
     </div>
     ${isMps() ? publishPanel() : ''}`;
 }
 
+function buildCardHtml() {
+  const b = S.build;
+  const errors = S.check.errors.length;
+  const stage = b.running ? b.stage || 0 : b.result ? BUILD_STAGES.length : -1;
+  const pct = b.running ? Math.min(99, Math.round(((stage + Math.min(0.95, b.sub || 0)) / BUILD_STAGES.length) * 100)) : b.result ? 100 : 0;
+  const C = 2 * Math.PI * 44;
+  const status = b.running ? `<span class="chip warn">идёт</span>` : b.result ? `<span class="chip ok">${icon('check', 11)}готово</span>` : errors ? `<span class="chip bad">${errors} ${plural(errors, 'ошибка', 'ошибки', 'ошибок')}</span>` : '<span class="chip">можно собирать</span>';
+  return `<div class="bc-head"><h2>Сборка ${esc(S.proj.info.version)}</h2>${status}<span class="grow"></span>
+      <button class="btn primary" data-act="build" ${(!isMps() && !S.st.iscc) || b.running || errors ? 'disabled' : ''}>${b.running ? '<span class="spinner"></span>Собираю…' : `${icon('build', 18)}Собрать установщик`}</button>
+      <button class="btn" data-act="preview-installer">${icon('play', 15)}Предпросмотр</button></div>
+    <div class="bc-body">
+      <div class="ring ${b.running ? 'run' : ''}"><svg viewBox="0 0 100 100"><defs><linearGradient id="ring-g" x1="0" x2="1"><stop offset="0" stop-color="var(--accent-2)"/><stop offset="1" stop-color="var(--accent)"/></linearGradient></defs>
+        <circle cx="50" cy="50" r="44" class="ring-bg"/><circle cx="50" cy="50" r="44" class="ring-fg" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${(C * (1 - pct / 100)).toFixed(1)}"/></svg>
+        <div class="ring-c"><b>${pct}%</b><span>${b.running ? esc(BUILD_STAGES[stage][0].toLowerCase()) : b.result ? 'готово' : 'ожидает'}</span></div></div>
+      <div class="steps-list">${BUILD_STAGES.map(([t, d], i) => {
+    const st = i < stage ? 'done' : i === stage && b.running ? 'run' : 'wait';
+    return `<div class="bstep ${st}"><span class="st">${st === 'done' ? icon('check', 13) : ''}</span><div class="grow"><b>${t}</b><small>${st === 'run' && b.log.length ? esc(b.log[b.log.length - 1]) : d}</small>
+      ${st === 'run' ? `<div class="bar"><i style="width:${Math.round(Math.min(0.95, b.sub || 0.05) * 100)}%"></i></div>` : ''}</div></div>`;
+  }).join('')}</div>
+    </div>`;
+}
+
+function releaseCardHtml() {
+  const last = S.build.result ? { file: S.build.result.exePath.split(/[\\/]/).pop(), exePath: S.build.result.exePath, size: S.build.result.size, version: S.proj.info.version, builtAt: new Date().toISOString(), mods: S.stats.mods } : (S.builds || [])[0];
+  if (!last) {
+    return `<div class="rc-art blank">${tankArt()}<div class="rc-title"><small>Релиз</small><h3>${esc(S.proj.info.name)}</h3></div></div>
+      <div class="rc-body"><div class="note">Здесь появится готовый установщик: файл, размер, что нового и кнопки «Запустить» и «Опубликовать».</div></div>`;
+  }
+  const cl = S.proj.changelog.find((e) => e.version === last.version);
+  const lines = (cl?.text || '').split(/\r?\n/).map((l) => l.replace(/^[•\-*\s]+/, '').trim()).filter(Boolean).slice(0, 4);
+  return `<div class="rc-art" id="rc-art">${tankArt()}<span class="chip glass">${S.build.result ? 'Только что собран' : 'Последняя сборка'}</span>
+      <div class="rc-title"><h3>${esc(S.proj.info.name)} ${esc(last.version)}</h3><small>${fmtDate(last.builtAt)} · ${nMods(last.mods || 0)}</small></div></div>
+    <div class="rc-body">
+      <div class="rc-file"><span class="ic">${icon('file', 18)}</span><div class="grow"><b>${esc(last.file)}</b><small>${fmtSize(last.size)}</small></div>
+        <button class="btn sm" data-act="hist-run" data-path="${esc(last.exePath)}">${icon('play', 13)}Запустить</button><button class="btn sm icon-only" data-act="show-item" data-path="${esc(last.exePath)}" title="Показать в папке">${icon('folder', 13)}</button></div>
+      <b class="rc-h">Что нового</b>
+      ${lines.length ? `<ul class="rc-notes">${lines.map((l) => `<li>${esc(l)}</li>`).join('')}</ul>` : '<div class="note">Список изменений пуст — заполните его ниже.</div>'}
+      ${isMps() ? `<div class="rc-acts"><button class="btn primary" data-act="goto-publish">${icon('upload', 15)}Опубликовать</button></div>` : ''}
+    </div>`;
+}
+
+// Обновляет только карточки сборки, чтобы не сбрасывать прокрутку страницы
+function refreshBuildCards() {
+  const c = $('#build-card');
+  if (c) c.innerHTML = buildCardHtml();
+  const r = $('#release-card');
+  if (r && !S.build.running) { r.innerHTML = releaseCardHtml(); paintReleaseArt(); }
+}
+
+function setStage(i, sub = 0) {
+  S.build.stage = i;
+  S.build.sub = sub;
+  refreshBuildCards();
+}
+
 async function runBuild() {
   if (S.build.running) return;
+  S.build = { running: true, log: [], result: null, stage: 0, sub: 0.3 };
+  if (S.page === 'build') renderPage();
   await saveNow();
   if (S.check.errors.length) {
+    S.build.running = false;
     toast('bad', 'Есть ошибки', S.check.errors[0]);
+    if (S.page === 'build') renderPage();
     return;
   }
   const log = (l) => {
     S.build.log.push(l);
+    if (S.build.stage === 1) S.build.sub = Math.min(0.95, (S.build.sub || 0) + 0.08);
     const c = $('#console');
     if (c) {
       const div = document.createElement('div');
@@ -786,38 +856,43 @@ async function runBuild() {
       if (/ошибк|error/i.test(l)) div.className = 'err';
       c.append(div);
       c.scrollTop = c.scrollHeight;
-    } else if (S.page === 'build') renderPage();
+    }
+    refreshBuildCards();
   };
-  S.build = { running: true, log: [], result: null };
-  renderPage();
   try {
     const p = S.proj;
+    setStage(1, 0.05);
     let assets;
     if (isMps()) assets = await mpsAssets(p, { log });
     else {
-    const urls = { banner: await getImg(p.design.bannerImage), sidebar: await getImg(p.design.sidebarImage), icon: await getImg(p.design.icon) };
-    log('Рисую баннер, картинку приветствия и иконку…');
-    assets = {
-      banner: ART.toRgba(await ART.banner(p, urls)),
-      sidebar: ART.toRgba(await ART.sidebar(p, urls)),
-      packImage: ART.toRgba(await ART.preview({ name: p.info.name, type: 'pack' }, urls.banner, p.design.accent)),
-      icon: await ART.icon(p, urls),
-      previews: {},
-    };
-    const nodes = [...walk(p.tree)].map((x) => x.node);
-    log(`Рисую превью модов (${nodes.length})…`);
-    for (const n of nodes) assets.previews[n.id] = ART.toRgba(await ART.preview(n, await getImg(n.preview), p.design.accent));
+      const urls = { banner: await getImg(p.design.bannerImage), sidebar: await getImg(p.design.sidebarImage), icon: await getImg(p.design.icon) };
+      log('Рисую баннер, картинку приветствия и иконку…');
+      assets = {
+        banner: ART.toRgba(await ART.banner(p, urls)),
+        sidebar: ART.toRgba(await ART.sidebar(p, urls)),
+        packImage: ART.toRgba(await ART.preview({ name: p.info.name, type: 'pack' }, urls.banner, p.design.accent)),
+        icon: await ART.icon(p, urls),
+        previews: {},
+      };
+      const nodes = [...walk(p.tree)].map((x) => x.node);
+      log(`Рисую превью модов (${nodes.length})…`);
+      for (const n of nodes) assets.previews[n.id] = ART.toRgba(await ART.preview(n, await getImg(n.preview), p.design.accent));
     }
+    setStage(2, 0.05);
     const res = await call(api.build, S.proj, assets);
+    setStage(3, 0.6);
     S.builds = res.project.builds;
     S.build.result = res;
     log(`Готово: ${S.build.result.exePath}`);
     toast('ok', 'Установщик собран', S.build.result.exePath);
+    S.build.running = false;
+    if (S.page === 'build') { renderPage(); celebrate($('#release-card')); }
   } catch (e) {
     log(e.message);
   } finally {
     S.build.running = false;
-    if (S.page === 'build') renderPage();
+    if (S.page === 'build' && !S.build.result) renderPage();
+    renderSidebar();
   }
 }
 
@@ -1251,6 +1326,7 @@ async function handleExternal(paths, under) {
 api.onBuildLog((line) => {
   if (!S.build.running) return;
   S.build.log.push(line);
+  if (S.build.stage === 2) { S.build.sub = Math.min(0.95, (S.build.sub || 0) + 0.06); refreshBuildCards(); }
   const c = $('#console');
   if (c) {
     const div = document.createElement('div');
@@ -1265,6 +1341,8 @@ api.onOpenFile((p) => quiet(handleExternal([p], null)));
 // ---------- старт ----------
 
 (async function init() {
+  // ответ главного процесса может прийти раньше, чем выполнятся остальные скрипты страницы (shell.js и др.)
+  if (document.readyState === 'loading') await new Promise((r) => document.addEventListener('DOMContentLoaded', r, { once: true }));
   $('#logo').innerHTML = LOGO;
   const st = await call(api.getState);
   S.st = st;

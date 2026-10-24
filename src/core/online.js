@@ -33,7 +33,7 @@ async function readBytes(fetchFn, url, { maxBytes = MAX_DOWNLOAD, onProgress } =
     onProgress?.(size, size);
     return fs.readFileSync(p);
   }
-  const res = await fetchFn(url, { headers: { 'User-Agent': 'ModPack-Studio' } });
+  const res = await fetchFn(url, { headers: { 'User-Agent': 'TankAir-Studio' } });
   if (!res.ok) throw new Error(`Сервер ответил ${res.status} для ${url}`);
   const total = Number(res.headers.get('content-length')) || 0;
   if (total > maxBytes) throw new Error('Файл слишком большой');
@@ -76,7 +76,7 @@ async function imageDataUrl(fetchFn, url) {
 
 // Проверяет и нормализует index.json каталога; адреса превращаются в абсолютные
 function parseCatalog(data, baseUrl) {
-  if (!data || data.format !== CATALOG_FORMAT) throw new Error('По этому адресу не каталог ModPack Studio');
+  if (!data || data.format !== CATALOG_FORMAT) throw new Error('По этому адресу не каталог TankAir Studio');
   const seen = new Set();
   const mods = [];
   for (const m of data.mods || []) {

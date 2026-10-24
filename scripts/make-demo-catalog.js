@@ -29,7 +29,7 @@ const tank = (x, y, s, fill) => `<g transform="translate(${x} ${y}) scale(${s})"
 
 const DEMOS = [
   {
-    id: 'demo_sight_classic', name: 'Прицел «Классика»', category: 'crosshair', author: 'ModPack Studio',
+    id: 'demo_sight_classic', name: 'Прицел «Классика»', category: 'crosshair', author: 'TankAir Studio',
     description: 'Минималистичный круглый прицел с точкой сведения и делениями дальности. Не перекрывает цель, хорошо читается на любых картах.',
     tags: ['прицел', 'минимализм'], conflicts: ['demo_sight_tactic'],
     colors: ['#141a1f', '#24201a', '#ffb547'],
@@ -40,7 +40,7 @@ const DEMOS = [
     </g><circle cx="320" cy="180" r="5" fill="#ffd27a"/>`,
   },
   {
-    id: 'demo_sight_tactic', name: 'Прицел «Тактик»', category: 'crosshair', author: 'ModPack Studio',
+    id: 'demo_sight_tactic', name: 'Прицел «Тактик»', category: 'crosshair', author: 'TankAir Studio',
     description: 'Шевронный прицел в стиле военных оптических систем. Цвет меняется при сведении. Несовместим с другими прицелами.',
     tags: ['прицел', 'шеврон'], conflicts: [],
     colors: ['#101a16', '#1b2420', '#6fe3a1'],
@@ -50,7 +50,7 @@ const DEMOS = [
     </g><circle cx="320" cy="200" r="4" fill="#b8ffd5"/>`,
   },
   {
-    id: 'demo_lamp', name: 'Лампа «Шестое чувство»', category: 'lamp', author: 'ModPack Studio',
+    id: 'demo_lamp', name: 'Лампа «Шестое чувство»', category: 'lamp', author: 'TankAir Studio',
     description: 'Крупная анимированная лампа засвета с таймером на 10 секунд и звуковым сигналом. Сразу видно, когда вас обнаружили.',
     tags: ['лампа', 'засвет', 'таймер'], conflicts: [],
     colors: ['#1d1610', '#2b1d12', '#ff9a2f'],
@@ -62,7 +62,7 @@ const DEMOS = [
     files: { 'lamp/lamp.ini': 'lamp=on\nsound=on\n', 'lamp/timer.ini': 'timer=10\n' },
   },
   {
-    id: 'demo_zoom', name: 'Зум x30 и отдаление камеры', category: 'camera', author: 'ModPack Studio',
+    id: 'demo_zoom', name: 'Зум x30 и отдаление камеры', category: 'camera', author: 'TankAir Studio',
     description: 'Добавляет кратности x16, x25, x30 в снайперский режим и увеличивает отдаление камеры в аркадном режиме.',
     tags: ['зум', 'камера'], conflicts: [],
     colors: ['#121722', '#1d2433', '#6aa8ff'],
@@ -72,7 +72,7 @@ const DEMOS = [
       ${[16, 25].map((z, i) => `<text x="${500 + i * 0}" y="${110 + i * 50}" font-family="Segoe UI, Arial" font-size="28" font-weight="700" fill="#6aa8ff" fill-opacity="${0.5 + i * 0.2}" text-anchor="middle">x${z}</text>`).join('')}`,
   },
   {
-    id: 'demo_markers', name: 'Маркеры с полосками ХП', category: 'markers', author: 'ModPack Studio',
+    id: 'demo_markers', name: 'Маркеры с полосками ХП', category: 'markers', author: 'TankAir Studio',
     description: 'Компактные маркеры над танками: название, полоска прочности с числом ХП и иконка класса техники.',
     tags: ['маркеры', 'хп'], conflicts: [],
     colors: ['#1a1414', '#251a1a', '#ff6159'],
@@ -85,7 +85,7 @@ const DEMOS = [
         <path d="M-8 40h16l-8 12z" fill="${c}"/></g>`).join('') + tank(330, 300, 0.7, '#3a2a2a'),
   },
   {
-    id: 'demo_damage', name: 'Лог урона и ассиста', category: 'damage', author: 'ModPack Studio',
+    id: 'demo_damage', name: 'Лог урона и ассиста', category: 'damage', author: 'TankAir Studio',
     description: 'Подробный журнал: нанесённый и полученный урон, урон по засвету и сбитым гусеницам, итог за бой.',
     tags: ['урон', 'лог', 'статистика'], conflicts: [],
     colors: ['#16141c', '#211d2b', '#c17ad6'],
@@ -96,7 +96,7 @@ const DEMOS = [
         <text x="100" y="26" font-family="Segoe UI, Arial" font-size="16" fill="#e6e1d6">${t}</text></g>`).join(''),
   },
   {
-    id: 'demo_minimap', name: 'Расширенная миникарта', category: 'minimap', author: 'ModPack Studio',
+    id: 'demo_minimap', name: 'Расширенная миникарта', category: 'minimap', author: 'TankAir Studio',
     description: 'Круги обзора и отрисовки, последние позиции пропавших из засвета противников и направление стволов.',
     tags: ['миникарта', 'обзор'], conflicts: [],
     colors: ['#121a14', '#1a2418', '#9bc25a'],
@@ -110,7 +110,7 @@ const DEMOS = [
       <rect x="150" y="130" width="11" height="11" fill="none" stroke="#ff6159" stroke-width="2"/></g>`,
   },
   {
-    id: 'demo_hangar', name: 'Удобный ангар', category: 'hangar', author: 'ModPack Studio',
+    id: 'demo_hangar', name: 'Удобный ангар', category: 'hangar', author: 'TankAir Studio',
     description: 'Карусель техники в несколько рядов, процент отметок и опыт на каждой машине, быстрые фильтры.',
     tags: ['ангар', 'карусель'], conflicts: [],
     colors: ['#18181b', '#26231f', '#e8a33d'],

@@ -12,7 +12,7 @@ using System.Linq;
 using System.Reflection;
 using System.Windows;
 
-[assembly: AssemblyTitle("ModPack Installer")]
+[assembly: AssemblyTitle("TankAir Installer")]
 
 namespace ModPackInstaller
 {

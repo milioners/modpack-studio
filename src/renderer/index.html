@@ -4,15 +4,17 @@
   <meta charset="utf-8">
   <meta http-equiv="Content-Security-Policy"
         content="default-src 'self'; img-src 'self' file: data: blob:; media-src file: data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'">
-  <title>ModPack Studio</title>
+  <title>TankAir Studio</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="online.css">
   <link rel="stylesheet" href="canvas-editor.css">
+  <link rel="stylesheet" href="shell.css">
 </head>
 <body>
+  <div id="wall"></div>
   <div class="app">
     <header class="titlebar">
-      <div class="brand"><span id="logo"></span><b>ModPack</b>&nbsp;Studio<span class="brand-sub">конструктор модпаков</span></div>
+      <div class="brand"><span id="logo"></span><b>TankAir</b>&nbsp;Studio<span class="brand-sub" id="title-crumb">конструктор модпаков</span></div>
       <div class="title-center" id="title-center"></div>
       <div class="title-right"><div class="title-actions" id="title-actions"></div>
       <div class="win-buttons">
@@ -33,5 +35,6 @@
   <script src="online.js"></script>
   <script src="installer-ui.js"></script>
   <script src="canvas-editor.js"></script>
+  <script src="shell.js"></script>
 </body>
 </html>

@@ -1,10 +1,10 @@
 {
-  "name": "modpack-studio",
-  "productName": "ModPack Studio",
-  "version": "1.3.0",
+  "name": "tankair-studio",
+  "productName": "TankAir Studio",
+  "version": "2.0.0",
   "description": "Конструктор модпаков для «Мира танков»",
   "main": "src/main/main.js",
-  "author": "ModPack Studio",
+  "author": "TankAir Studio",
   "license": "MIT",
   "scripts": {
     "start": "electron .",

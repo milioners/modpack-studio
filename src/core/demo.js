@@ -16,7 +16,7 @@ const LAYOUT = [
 
 function createDemo(dir, catalogDir) {
   const p = project.create(dir, {
-    name: 'Демо-модпак', version: '1.0', author: 'ModPack Studio',
+    name: 'Демо-модпак', version: '1.0', author: 'TankAir Studio',
     description: 'Пример модпака: прицелы на выбор, боевой интерфейс, зум и удобный ангар.\nВсе моды демонстрационные и ничего не меняют в игре.',
   });
   const cat = readJson(path.join(catalogDir, 'catalog.json'));

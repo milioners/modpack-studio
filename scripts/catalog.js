@@ -61,7 +61,7 @@ function build() {
     });
   }
   const index = {
-    format: 'modpack-studio-catalog', version: 1, title: 'Каталог ModPack Studio',
+    format: 'modpack-studio-catalog', version: 1, title: 'Каталог TankAir Studio',
     updated: new Date().toISOString(), categories: CATEGORIES, mods,
   };
   fs.writeFileSync(path.join(ROOT, 'index.json'), `${JSON.stringify(index, null, 2)}\n`, 'utf8');

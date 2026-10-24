@@ -612,7 +612,7 @@ function buildIss(projectDir, project, assets = {}, opts = {}) {
     `VersionInfoDescription=${issStr(info.name)} — установщик модпака`,
   ].filter(Boolean);
 
-  const iss = `; Сгенерировано ModPack Studio. Можно редактировать вручную.
+  const iss = `; Сгенерировано TankAir Studio. Можно редактировать вручную.
 [Setup]
 ${setupLines.join('\n')}
 

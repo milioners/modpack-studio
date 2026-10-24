@@ -50,7 +50,7 @@ function defaults(info = {}) {
     },
     // История версий: [{ version, date, text }], новые сверху. «Что нового» в установщике берётся отсюда
     changelog: [],
-    // Оформление собственного установщика (ModPack Installer)
+    // Оформление собственного установщика (TankAir Installer)
     installer: defaultInstallerTheme(),
     // Откуда установщик игрока берёт обновления модпака: none | github (repo) | url (адрес update.json)
     publish: { type: 'none', repo: '', url: '' },
@@ -129,7 +129,7 @@ function open(dir) {
   const file = path.join(dir, PROJECT_FILE);
   if (!fs.existsSync(file)) throw new Error(`В папке ${dir} нет проекта модпака (project.json)`);
   const p = readJson(file);
-  if (p.format !== FORMAT) throw new Error('Это не проект ModPack Studio');
+  if (p.format !== FORMAT) throw new Error('Это не проект TankAir Studio');
   return normalize(p);
 }
 

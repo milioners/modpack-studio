@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Референсы студии</title>
+<style>
+  :root { --page: #0a0b0d; --page-text: #e9e4d9; --page-muted: #8a857b; }
+  * { box-sizing: border-box; margin: 0; }
+  body { background: var(--page); color: var(--page-text); font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; padding: 48px 16px 80px; }
+  .page { max-width: 1320px; margin: 0 auto; }
+  .page > header { margin-bottom: 40px; }
+  .page > header h1 { font: 700 34px/1.1 "Segoe UI Variable Display", "Segoe UI", sans-serif; letter-spacing: -0.02em; }
+  .page > header p { color: var(--page-muted); margin-top: 10px; font-size: 15px; max-width: 760px; line-height: 1.5; }
+  .ref { margin: 56px 0 0; }
+  .ref-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 14px; flex-wrap: wrap; }
+  .ref-head .n { font: 700 13px/1 Consolas, monospace; color: #f0a53a; border: 1px solid #f0a53a55; padding: 5px 8px; border-radius: 6px; }
+  .ref-head h2 { font: 650 22px/1.2 "Segoe UI Variable Display", "Segoe UI", sans-serif; }
+  .ref-head p { color: var(--page-muted); font-size: 14px; flex-basis: 100%; line-height: 1.5; }
+  .stage { width: 100%; overflow: hidden; border-radius: 14px; }
+  .stage > .win { transform-origin: 0 0; }
+
+  /* ---------- окно студии ---------- */
+  .win {
+    --bg: #0e0f12; --s1: rgba(23,25,29,.72); --s2: rgba(33,36,42,.78); --s3: rgba(45,48,56,.9); --line: rgba(255,255,255,.07); --line2: rgba(255,255,255,.12);
+    --text: #efe9dd; --text2: #b9b3a7; --muted: #7f7a71; --acc: #f0a53a; --acc2: #ffcf7a; --accText: #1d1305; --ok: #5cc98a; --bad: #ef5d55; --info: #6aa8ff;
+    --wall: radial-gradient(900px 520px at 85% -10%, rgba(240,165,58,.22), transparent 60%), radial-gradient(700px 500px at -10% 110%, rgba(90,120,170,.18), transparent 60%), linear-gradient(160deg, #121418, #0b0c0f);
+    width: 1280px; height: 800px; position: relative; border-radius: 14px; overflow: hidden; color: var(--text);
+    background: var(--wall); border: 1px solid var(--line2); box-shadow: 0 30px 80px rgba(0,0,0,.55);
+    display: grid; grid-template-columns: 232px 1fr; grid-template-rows: 44px 1fr; font-size: 13px;
+  }
+  .win.light {
+    --bg: #f3f1ec; --s1: rgba(255,255,255,.7); --s2: rgba(255,255,255,.9); --s3: #ece8e0; --line: rgba(20,20,30,.08); --line2: rgba(20,20,30,.12);
+    --text: #1c1d21; --text2: #4a4c55; --muted: #8b8d96; --acc: #e2741f; --acc2: #f59a4a; --accText: #fff;
+    --wall: radial-gradient(900px 520px at 85% -10%, rgba(226,116,31,.18), transparent 60%), radial-gradient(700px 500px at -10% 110%, rgba(80,140,220,.16), transparent 60%), linear-gradient(160deg, #f7f5f0, #ebe8e1);
+    box-shadow: 0 30px 80px rgba(0,0,0,.35);
+  }
+  .win.neon {
+    --s1: rgba(24,18,44,.62); --s2: rgba(36,28,66,.7); --s3: rgba(54,42,96,.8); --line: rgba(190,160,255,.10); --line2: rgba(190,160,255,.18);
+    --text: #f1ecff; --text2: #c1b8e0; --muted: #8a80ad; --acc: #b06cff; --acc2: #6ce4ff; --accText: #12061f;
+    --wall: radial-gradient(900px 600px at 90% -10%, rgba(176,108,255,.35), transparent 60%), radial-gradient(800px 600px at -10% 110%, rgba(60,220,255,.20), transparent 60%), linear-gradient(160deg, #110c22, #07060e);
+  }
+  .tb { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; padding: 0 0 0 16px; border-bottom: 1px solid var(--line); background: rgba(0,0,0,.08); backdrop-filter: blur(20px); }
+  .light .tb { background: rgba(255,255,255,.35); }
+  .logo { width: 22px; height: 22px; border-radius: 7px; background: linear-gradient(135deg, var(--acc2), var(--acc)); display: grid; place-items: center; box-shadow: 0 0 18px color-mix(in srgb, var(--acc) 50%, transparent); }
+  .logo svg { width: 13px; height: 13px; }
+  .tb b { font-weight: 650; font-size: 13px; }
+  .tb .crumb { color: var(--muted); }
+  .tb .search { margin-left: auto; margin-right: auto; width: 380px; height: 28px; border-radius: 8px; background: var(--s2); border: 1px solid var(--line); display: flex; align-items: center; gap: 8px; padding: 0 10px; color: var(--muted); font-size: 12px; transform: translateX(-80px); }
+  .kbd { margin-left: auto; font: 600 10.5px/1 Consolas, monospace; border: 1px solid var(--line2); border-radius: 5px; padding: 3px 5px; color: var(--text2); background: var(--s1); }
+  .wc { display: flex; height: 100%; }
+  .wc i { width: 46px; display: grid; place-items: center; color: var(--muted); font-style: normal; }
+
+  .side { padding: 14px 10px; display: flex; flex-direction: column; gap: 2px; border-right: 1px solid var(--line); background: rgba(0,0,0,.12); backdrop-filter: blur(30px); }
+  .light .side { background: rgba(255,255,255,.4); }
+  .side .proj { display: flex; gap: 10px; align-items: center; padding: 8px; border-radius: 12px; background: var(--s1); border: 1px solid var(--line); margin-bottom: 12px; }
+  .side .proj .av { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #3b2a12, #7a4d16); display: grid; place-items: center; }
+  .neon .side .proj .av { background: linear-gradient(135deg, #2b145a, #6d34c9); }
+  .light .side .proj .av { background: linear-gradient(135deg, #ffd9b0, #f2a35e); }
+  .side .proj small { display: block; color: var(--muted); font-size: 11px; }
+  .side .lab { color: var(--muted); font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; padding: 12px 10px 6px; }
+  .nav { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; color: var(--text2); position: relative; }
+  .nav svg { width: 16px; height: 16px; opacity: .85; }
+  .nav.on { background: var(--s2); color: var(--text); box-shadow: inset 0 0 0 1px var(--line); }
+  .nav.on::before { content: ""; position: absolute; left: -10px; top: 9px; bottom: 9px; width: 3px; border-radius: 3px; background: var(--acc); box-shadow: 0 0 10px var(--acc); }
+  .nav .cnt { margin-left: auto; font-size: 11px; color: var(--muted); }
+  .nav .dot { margin-left: auto; width: 7px; height: 7px; border-radius: 50%; background: var(--bad); box-shadow: 0 0 8px var(--bad); }
+  .side .foot { margin-top: auto; padding: 12px; border-radius: 12px; background: linear-gradient(135deg, color-mix(in srgb, var(--acc) 22%, transparent), transparent); border: 1px solid color-mix(in srgb, var(--acc) 30%, transparent); }
+  .side .foot b { display: block; font-size: 12.5px; }
+  .side .foot small { color: var(--text2); font-size: 11.5px; line-height: 1.4; display: block; margin-top: 4px; }
+
+  .main { padding: 22px 26px; overflow: hidden; position: relative; }
+  .card { background: var(--s1); border: 1px solid var(--line); border-radius: 16px; backdrop-filter: blur(24px); }
+  .btn { display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 14px; border-radius: 9px; font-weight: 600; font-size: 12.5px; border: 1px solid var(--line2); background: var(--s2); color: var(--text); white-space: nowrap; }
+  .btn.p { background: linear-gradient(180deg, var(--acc2), var(--acc)); color: var(--accText); border: 0; box-shadow: 0 6px 22px color-mix(in srgb, var(--acc) 40%, transparent), inset 0 1px 0 rgba(255,255,255,.35); }
+  .btn svg { width: 14px; height: 14px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 9px; border-radius: 999px; font-size: 11.5px; background: var(--s2); border: 1px solid var(--line); color: var(--text2); white-space: nowrap; }
+  .chip.ok { color: var(--ok); background: color-mix(in srgb, var(--ok) 12%, transparent); border-color: color-mix(in srgb, var(--ok) 25%, transparent); }
+  .chip.warn { color: var(--acc); background: color-mix(in srgb, var(--acc) 12%, transparent); border-color: color-mix(in srgb, var(--acc) 28%, transparent); }
+  .chip.bad { color: var(--bad); background: color-mix(in srgb, var(--bad) 12%, transparent); border-color: color-mix(in srgb, var(--bad) 25%, transparent); }
+  .chip.on { background: var(--acc); color: var(--accText); border-color: transparent; font-weight: 600; }
+  .h { font: 650 15px/1.2 "Segoe UI Variable Display", "Segoe UI", sans-serif; }
+  .mut { color: var(--muted); }
+
+  /* дашборд */
+  .hero { height: 232px; border-radius: 20px; position: relative; overflow: hidden; border: 1px solid var(--line2);
+    background: linear-gradient(90deg, rgba(10,10,12,.92) 0%, rgba(10,10,12,.55) 45%, rgba(10,10,12,.1) 100%), var(--art); padding: 26px 28px; display: flex; flex-direction: column; }
+  .hero .ver { display: flex; gap: 8px; }
+  .hero h1 { font: 750 40px/1 "Segoe UI Variable Display", "Segoe UI", sans-serif; letter-spacing: -0.02em; margin-top: 14px; color: #fff; }
+  .hero p { color: rgba(255,255,255,.72); margin-top: 8px; max-width: 460px; line-height: 1.5; }
+  .hero .acts { margin-top: auto; display: flex; gap: 10px; }
+  .hero .acts .btn:not(.p) { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.14); color: #fff; backdrop-filter: blur(10px); }
+  .hero .badge { position: absolute; right: 22px; top: 22px; text-align: right; color: rgba(255,255,255,.75); font-size: 12px; }
+  .hero .badge b { display: block; font: 700 28px/1 "Segoe UI Variable Display", sans-serif; color: #fff; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 16px; }
+  .stat { padding: 14px 16px; position: relative; overflow: hidden; }
+  .stat small { color: var(--muted); font-size: 11.5px; }
+  .stat b { display: block; font: 700 26px/1.1 "Segoe UI Variable Display", sans-serif; margin-top: 6px; }
+  .stat .d { font-size: 11.5px; color: var(--ok); margin-top: 2px; }
+  .stat svg.sp { position: absolute; right: 12px; bottom: 12px; width: 92px; height: 34px; }
+  .grid2 { display: grid; grid-template-columns: 1.25fr 1fr; gap: 14px; margin-top: 14px; }
+  .todo { padding: 16px; }
+  .todo-i { display: flex; gap: 12px; align-items: center; padding: 11px 12px; border-radius: 12px; background: var(--s2); border: 1px solid var(--line); margin-top: 9px; }
+  .todo-i .ic { width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center; flex: none; }
+  .todo-i .ic svg { width: 16px; height: 16px; }
+  .todo-i b { font-weight: 600; font-size: 12.5px; display: block; }
+  .todo-i small { color: var(--muted); font-size: 11.5px; }
+  .todo-i .btn { margin-left: auto; height: 28px; padding: 0 10px; font-size: 11.5px; }
+  .tl { padding: 16px; }
+  .tl-i { display: grid; grid-template-columns: 14px 1fr auto; gap: 12px; align-items: start; padding: 9px 0; position: relative; }
+  .tl-i::before { content: ""; position: absolute; left: 6px; top: 24px; bottom: -10px; width: 2px; background: var(--line2); }
+  .tl-i:last-child::before { display: none; }
+  .tl-i i { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--acc); margin-top: 3px; background: var(--bg); }
+  .tl-i.cur i { background: var(--acc); box-shadow: 0 0 12px var(--acc); }
+  .tl-i b { font-size: 12.5px; }
+  .tl-i small { display: block; color: var(--muted); font-size: 11.5px; margin-top: 2px; }
+  .tl-i span { font-size: 11.5px; color: var(--text2); }
+
+  /* витрина */
+  .toolbar { display: flex; gap: 8px; align-items: center; margin-bottom: 16px; }
+  .toolbar .h { font-size: 22px; margin-right: 14px; white-space: nowrap; }
+  .seg { display: flex; padding: 3px; background: var(--s2); border: 1px solid var(--line); border-radius: 9px; margin-left: auto; }
+  .seg i { width: 30px; height: 26px; display: grid; place-items: center; border-radius: 6px; color: var(--muted); font-style: normal; }
+  .seg i.on { background: var(--s3); color: var(--text); }
+  .mods { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .mod { overflow: hidden; padding: 0; }
+  .mod .pv { height: 132px; position: relative; display: grid; place-items: center; overflow: hidden; }
+  .mod .pv .tag { position: absolute; left: 10px; top: 10px; }
+  .mod .pv .sel { position: absolute; right: 10px; top: 10px; width: 24px; height: 24px; border-radius: 8px; background: var(--acc); display: grid; place-items: center; box-shadow: 0 0 14px var(--acc); }
+  .mod .pv .sel.off { background: rgba(0,0,0,.4); border: 1.5px solid rgba(255,255,255,.4); box-shadow: none; }
+  .mod .bd { padding: 12px 14px 14px; }
+  .mod .bd b { font-size: 13.5px; font-weight: 650; }
+  .mod .bd p { color: var(--muted); font-size: 11.5px; margin-top: 4px; line-height: 1.45; }
+  .mod .meta { display: flex; gap: 6px; margin-top: 10px; align-items: center; }
+  .mod .meta .r { margin-left: auto; color: var(--text2); font-size: 11.5px; }
+  .mod.active { box-shadow: 0 0 0 1.5px var(--acc), 0 10px 40px color-mix(in srgb, var(--acc) 22%, transparent); }
+  .drawer { position: absolute; right: 0; top: 44px; bottom: 0; width: 380px; background: var(--s2); border-left: 1px solid var(--line2); backdrop-filter: blur(40px); padding: 0; box-shadow: -30px 0 60px rgba(0,0,0,.35); }
+  .drawer .big { height: 214px; position: relative; display: grid; place-items: center; }
+  .drawer .thumbs { display: flex; gap: 6px; padding: 10px 18px 0; }
+  .drawer .thumbs i { flex: 1; height: 44px; border-radius: 8px; background: var(--s3); border: 1px solid var(--line); }
+  .drawer .thumbs i.on { border-color: var(--acc); }
+  .drawer .in { padding: 14px 18px; }
+  .drawer h3 { font: 700 20px/1.2 "Segoe UI Variable Display", sans-serif; }
+  .kv { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+  .kv div { background: var(--s1); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; }
+  .kv small { display: block; color: var(--muted); font-size: 10.5px; }
+  .kv b { font-size: 12.5px; }
+  .opt { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 12.5px; }
+  .tgl { width: 34px; height: 20px; border-radius: 10px; background: var(--acc); position: relative; }
+  .tgl::after { content: ""; position: absolute; right: 2px; top: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; }
+  .tgl.off { background: var(--s3); }
+  .tgl.off::after { right: auto; left: 2px; }
+  .swatches { display: flex; gap: 6px; }
+  .swatches i { width: 20px; height: 20px; border-radius: 6px; border: 2px solid transparent; }
+  .swatches i.on { border-color: #fff; }
+
+  /* Ctrl+K */
+  .dim { position: absolute; inset: 0; background: rgba(5,5,8,.55); backdrop-filter: blur(6px); }
+  .palette { position: absolute; left: 50%; top: 96px; width: 640px; transform: translateX(-50%); border-radius: 18px; background: color-mix(in srgb, var(--s2) 92%, transparent); border: 1px solid var(--line2); box-shadow: 0 40px 100px rgba(0,0,0,.6); backdrop-filter: blur(40px); overflow: hidden; }
+  .palette .q { display: flex; align-items: center; gap: 12px; padding: 16px 18px; border-bottom: 1px solid var(--line); font-size: 17px; }
+  .palette .q .caret { width: 2px; height: 20px; background: var(--acc); margin-left: -10px; }
+  .palette .grp { color: var(--muted); font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; padding: 12px 18px 6px; }
+  .palette .it { display: flex; align-items: center; gap: 12px; padding: 9px 12px; margin: 0 6px; border-radius: 10px; font-size: 13px; }
+  .palette .it .ic { width: 30px; height: 30px; border-radius: 8px; background: var(--s3); display: grid; place-items: center; flex: none; overflow: hidden; }
+  .palette .it .ic svg { width: 15px; height: 15px; }
+  .palette .it small { color: var(--muted); margin-left: 6px; }
+  .palette .it .kbd { margin-left: auto; }
+  .palette .it.on { background: color-mix(in srgb, var(--acc) 16%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--acc) 35%, transparent); }
+  .palette .it mark { background: none; color: var(--acc); font-weight: 700; }
+  .palette .ft { display: flex; gap: 16px; padding: 10px 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11.5px; margin-top: 8px; }
+
+  /* сборка */
+  .build { display: grid; grid-template-columns: 1fr 400px; gap: 16px; height: 100%; }
+  .ring { width: 190px; height: 190px; position: relative; margin: 6px auto 0; }
+  .ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .ring .c { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; }
+  .ring .c b { font: 750 44px/1 "Segoe UI Variable Display", sans-serif; display: block; }
+  .steps { margin-top: 18px; display: flex; flex-direction: column; gap: 8px; }
+  .step { display: flex; gap: 12px; align-items: center; padding: 11px 14px; border-radius: 12px; background: var(--s2); border: 1px solid var(--line); }
+  .step .st { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; flex: none; }
+  .step.done .st { background: color-mix(in srgb, var(--ok) 20%, transparent); color: var(--ok); }
+  .step.run { border-color: color-mix(in srgb, var(--acc) 40%, transparent); background: color-mix(in srgb, var(--acc) 9%, var(--s2)); }
+  .step.run .st { border: 2.5px solid var(--acc); border-right-color: transparent; }
+  .step.wait .st { border: 2px dashed var(--line2); }
+  .step b { font-size: 12.5px; font-weight: 600; }
+  .step small { color: var(--muted); font-size: 11.5px; display: block; }
+  .step .t { margin-left: auto; color: var(--muted); font-size: 11.5px; font-family: Consolas, monospace; }
+  .bar { height: 4px; border-radius: 2px; background: var(--s3); overflow: hidden; margin-top: 6px; }
+  .bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--acc), var(--acc2)); border-radius: 2px; }
+  .release { padding: 0; overflow: hidden; display: flex; flex-direction: column; }
+  .release .top { height: 170px; position: relative; padding: 18px; background: linear-gradient(180deg, transparent 30%, rgba(0,0,0,.75)), var(--art); display: flex; flex-direction: column; justify-content: flex-end; color: #fff; }
+  .release .top h3 { font: 750 26px/1 "Segoe UI Variable Display", sans-serif; }
+  .release .rb { padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+  .file { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; background: var(--s2); border: 1px solid var(--line); }
+  .file .ic { width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, var(--acc2), var(--acc)); display: grid; place-items: center; }
+  .file b { font-size: 12.5px; }
+  .file small { display: block; color: var(--muted); font-size: 11.5px; }
+  .notes { padding-left: 18px; }
+  .notes li { color: var(--text2); font-size: 12px; line-height: 1.6; }
+  .confetti i { position: absolute; width: 7px; height: 12px; border-radius: 2px; opacity: .9; }
+
+  /* темы */
+  .themes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 14px; }
+  .th { border-radius: 14px; overflow: hidden; border: 1px solid var(--line2); background: var(--s1); }
+  .th .mini { height: 120px; display: grid; grid-template-columns: 52px 1fr; gap: 6px; padding: 8px; }
+  .th .mini .ms { border-radius: 8px; }
+  .th .mini .mm { border-radius: 8px; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+  .th .mini .mm i { display: block; height: 8px; border-radius: 4px; }
+  .th .lbl { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; font-size: 12.5px; font-weight: 600; }
+  .th.on { box-shadow: 0 0 0 2px var(--acc); }
+  .row { display: flex; align-items: center; justify-content: space-between; padding: 13px 0; border-bottom: 1px solid var(--line); }
+  .row b { font-size: 13px; font-weight: 600; display: block; }
+  .row small { color: var(--muted); font-size: 11.5px; }
+  .slider { width: 180px; height: 4px; border-radius: 2px; background: var(--s3); position: relative; }
+  .slider i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 2px; background: var(--acc); }
+  .slider i::after { content: ""; position: absolute; right: -8px; top: -6px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,.4); }
+  .segt { display: flex; padding: 3px; background: var(--s2); border: 1px solid var(--line); border-radius: 9px; }
+  .segt span { padding: 5px 12px; border-radius: 6px; font-size: 12px; color: var(--muted); }
+  .segt span.on { background: var(--s3); color: var(--text); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+  .light .segt span.on { background: #fff; }
+
+  /* редактор дизайна */
+  .ed { display: grid; grid-template-columns: 220px 1fr 270px; gap: 12px; height: 100%; }
+  .ed .pnl { padding: 12px; }
+  .lay { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 8px; color: var(--text2); font-size: 12px; }
+  .lay.on { background: color-mix(in srgb, var(--acc) 15%, transparent); color: var(--text); }
+  .lay svg { width: 13px; height: 13px; opacity: .7; }
+  .canvas { position: relative; border-radius: 16px; background: repeating-conic-gradient(rgba(255,255,255,.025) 0 25%, transparent 0 50%) 0 0/24px 24px, rgba(0,0,0,.25); border: 1px solid var(--line); display: grid; place-items: center; overflow: hidden; }
+  .shot { width: 450px; height: 286px; border-radius: 12px; position: relative; overflow: hidden; box-shadow: 0 30px 70px rgba(0,0,0,.6); background: linear-gradient(90deg, rgba(8,8,10,.9), rgba(8,8,10,.2)), var(--art); }
+  .selbox { position: absolute; border: 1.5px solid #4f9be8; }
+  .selbox i { position: absolute; width: 8px; height: 8px; background: #fff; border: 1.5px solid #4f9be8; border-radius: 2px; }
+  .floatbar { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); display: flex; gap: 4px; padding: 5px; border-radius: 12px; background: var(--s2); border: 1px solid var(--line2); backdrop-filter: blur(30px); box-shadow: 0 10px 30px rgba(0,0,0,.4); }
+  .floatbar i { width: 32px; height: 30px; border-radius: 8px; display: grid; place-items: center; color: var(--text2); font-style: normal; }
+  .floatbar i.on { background: var(--acc); color: var(--accText); }
+  .floatbar i svg { width: 15px; height: 15px; }
+  .prop { margin-top: 12px; }
+  .prop label { display: block; color: var(--muted); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 6px; }
+  .fld { height: 30px; border-radius: 8px; background: var(--s2); border: 1px solid var(--line); display: flex; align-items: center; padding: 0 10px; font-size: 12px; color: var(--text2); gap: 8px; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+
+  .notes-page { margin-top: 64px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+  .notes-page div { border: 1px solid #24262b; border-radius: 12px; padding: 16px; background: #111216; }
+  .notes-page b { font-size: 14px; }
+  .notes-page p { color: var(--page-muted); font-size: 13px; line-height: 1.5; margin-top: 6px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1>ModPack Studio — референсы нового интерфейса</h1>
+    <p>Шесть экранов одной системы: окно с эффектом «стекла» Windows 11, общий фон-обои, мягкие стеклянные панели, один акцентный цвет темы. Темы «Тактика», «Светлая» и «Неон» используют одни и те же компоненты.</p>
+  </header>
+  <div id="refs"></div>
+
+  <div class="notes-page">
+    <div><b>Стекло и обои</b><p>Фон окна — градиент или размытая картинка из баннера модпака. Панели полупрозрачные, поэтому у каждого модпака студия выглядит по-своему.</p></div>
+    <div><b>Один акцент</b><p>Цвет темы — на активном пункте меню, главной кнопке, прогрессе и выделении. Остальное нейтральное.</p></div>
+    <div><b>Крупная типографика</b><p>Segoe UI Variable Display для заголовков и цифр, мелкие подписи приглушённым цветом.</p></div>
+    <div><b>Движение</b><p>Плавные переходы между разделами, карточки появляются по очереди, прогресс сборки и конфетти при публикации.</p></div>
+  </div>
+</div>
+
+<script>
+const I = {
+  tank: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 15h18l-2 4H5zM6 11h10l2 3H4zM9 8h6v3H9zm6 1h6v1.5h-6z"/></svg>',
+  home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>',
+  grid: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>',
+  search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="14" height="14"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>',
+  brush: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 4l6 6-9 9H5v-6z"/><path d="M12 6l6 6"/></svg>',
+  info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>',
+  box: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 8l-9-5-9 5 9 5zM3 8v8l9 5 9-5V8M12 13v8"/></svg>',
+  cloud: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 18a5 5 0 1 1 1-9.9A6 6 0 0 1 19 10a4 4 0 0 1-1 8z"/><path d="M12 11v6M9.5 13.5L12 11l2.5 2.5"/></svg>',
+  chart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
+  gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg>',
+  play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4l13 8-13 8z"/></svg>',
+  hammer: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 6l4 4M3 21l9-9M12 4l6-1 3 3-1 6-3 1-6-6z"/></svg>',
+  upload: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>',
+  alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l10 18H2zM12 10v5M12 18v.5"/></svg>',
+  refresh: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 11a8 8 0 1 0-2 5.5M20 4v7h-7"/></svg>',
+  text: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 6V4h14v2M12 4v16M9 20h6"/></svg>',
+  img: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="13" height="13"><path d="M5 12l5 5 9-10"/></svg>',
+  cursor: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 7-6 2-2 6z"/></svg>',
+  square: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="3"/></svg>',
+  file: '<svg viewBox="0 0 24 24" fill="none" stroke="#1d1305" stroke-width="2" width="18" height="18"><path d="M6 3h8l5 5v13H6zM14 3v5h5"/></svg>',
+};
+
+// «Скриншоты» модов и баннеры — чистый CSS + SVG
+const art = {
+  hangar: 'radial-gradient(400px 260px at 72% 60%, rgba(255,170,70,.55), transparent 70%), radial-gradient(500px 300px at 90% 0%, rgba(255,120,40,.35), transparent 70%), linear-gradient(160deg, #2b2117, #120d09)',
+  neon: 'radial-gradient(400px 260px at 72% 60%, rgba(176,108,255,.6), transparent 70%), radial-gradient(500px 300px at 95% 0%, rgba(80,220,255,.4), transparent 70%), linear-gradient(160deg, #1d1236, #0a0715)',
+  light: 'radial-gradient(400px 260px at 72% 60%, rgba(255,160,80,.55), transparent 70%), radial-gradient(500px 300px at 95% 0%, rgba(110,170,255,.4), transparent 70%), linear-gradient(160deg, #3a2c22, #17110c)',
+};
+const tankArt = (c = '#ffb24a', s = 1) => `<svg viewBox="0 0 400 200" style="position:absolute;right:${-10 * s}px;bottom:-8px;width:${430 * s}px;opacity:.95"><defs><linearGradient id="g${c.slice(1)}" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="${c}" stop-opacity=".9"/><stop offset="1" stop-color="#000" stop-opacity=".9"/></linearGradient></defs><path fill="url(#g${c.slice(1)})" d="M40 150h330l-25 38H70zM90 110h200l40 36H60zM150 78h110v34H150zM255 88h130v12H255z"/><g fill="#000" opacity=".55"><circle cx="100" cy="168" r="14"/><circle cx="145" cy="170" r="14"/><circle cx="190" cy="170" r="14"/><circle cx="235" cy="170" r="14"/><circle cx="280" cy="170" r="14"/><circle cx="322" cy="168" r="14"/></g></svg>`;
+const preview = {
+  scope: (c) => `<svg viewBox="0 0 120 80" width="140"><circle cx="60" cy="40" r="26" fill="none" stroke="${c}" stroke-width="2"/><circle cx="60" cy="40" r="34" fill="none" stroke="${c}" stroke-width="1" stroke-dasharray="3 4" opacity=".6"/><path d="M60 6v20M60 54v20M20 40h20M80 40h20" stroke="${c}" stroke-width="2"/><circle cx="60" cy="40" r="2.5" fill="${c}"/></svg>`,
+  map: (c) => `<svg viewBox="0 0 120 80" width="120"><rect x="20" y="6" width="80" height="68" rx="4" fill="rgba(0,0,0,.35)" stroke="${c}" stroke-opacity=".5"/><path d="M20 30h80M20 52h80M46 6v68M74 6v68" stroke="${c}" stroke-opacity=".25"/><circle cx="36" cy="22" r="4" fill="#5cc98a"/><circle cx="84" cy="60" r="4" fill="#ef5d55"/><circle cx="62" cy="40" r="10" fill="${c}" fill-opacity=".25" stroke="${c}"/></svg>`,
+  hp: (c) => `<svg viewBox="0 0 160 80" width="170"><g font-family="Segoe UI" font-size="9" fill="#fff"><rect x="10" y="12" width="140" height="10" rx="3" fill="rgba(255,255,255,.12)"/><rect x="10" y="12" width="96" height="10" rx="3" fill="#5cc98a"/><rect x="10" y="30" width="140" height="10" rx="3" fill="rgba(255,255,255,.12)"/><rect x="10" y="30" width="60" height="10" rx="3" fill="${c}"/><rect x="10" y="48" width="140" height="10" rx="3" fill="rgba(255,255,255,.12)"/><rect x="10" y="48" width="122" height="10" rx="3" fill="#5cc98a"/><text x="12" y="72" opacity=".7">ХП-бар союзников</text></g></svg>`,
+  dmg: (c) => `<svg viewBox="0 0 160 80" width="170"><g font-family="Segoe UI" font-weight="700"><text x="20" y="34" font-size="22" fill="${c}">−420</text><text x="88" y="54" font-size="15" fill="#ef5d55">−180</text><text x="40" y="66" font-size="12" fill="#fff" opacity=".6">урон за бой 2 340</text></g></svg>`,
+  zoom: (c) => `<svg viewBox="0 0 120 80" width="130"><circle cx="54" cy="38" r="22" fill="none" stroke="${c}" stroke-width="3"/><path d="M70 54l18 18" stroke="${c}" stroke-width="5" stroke-linecap="round"/><text x="44" y="43" font-family="Segoe UI" font-weight="700" font-size="13" fill="#fff">x30</text></svg>`,
+  sound: (c) => `<svg viewBox="0 0 120 80" width="140"><g fill="${c}">${[16, 30, 52, 40, 24, 46, 60, 34, 20, 42, 28, 14].map((h, i) => `<rect x="${12 + i * 8.4}" y="${40 - h / 2}" width="5" height="${h}" rx="2.5" opacity="${0.5 + (i % 3) * 0.2}"/>`).join('')}</g></svg>`,
+};
+const pvBg = ['linear-gradient(135deg,#3a2614,#120c08)', 'linear-gradient(135deg,#132535,#081018)', 'linear-gradient(135deg,#1d2a17,#0b1008)', 'linear-gradient(135deg,#351717,#130808)', 'linear-gradient(135deg,#251a3b,#0d0816)', 'linear-gradient(135deg,#2c2a14,#100f07)'];
+
+const spark = (pts, c) => `<svg class="sp" viewBox="0 0 92 34"><defs><linearGradient id="sp${c.slice(1)}" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="${c}" stop-opacity=".35"/><stop offset="1" stop-color="${c}" stop-opacity="0"/></linearGradient></defs><path d="M0 ${34 - pts[0]} ${pts.map((p, i) => `L${(i * 92) / (pts.length - 1)} ${34 - p}`).join(' ')} L92 34 L0 34Z" fill="url(#sp${c.slice(1)})"/><path d="M0 ${34 - pts[0]} ${pts.map((p, i) => `L${(i * 92) / (pts.length - 1)} ${34 - p}`).join(' ')}" fill="none" stroke="${c}" stroke-width="2"/></svg>`;
+
+function shell(theme, active, body, extra = '') {
+  const nav = [['home', 'Обзор'], ['grid', 'Состав модпака', '24'], ['search', 'Каталог модов'], ['brush', 'Оформление'], ['info', 'Сведения'], ['box', 'Сборка'], ['cloud', 'Публикация'], ['chart', 'Статистика']];
+  return `<div class="win ${theme}">
+    <div class="tb"><span class="logo" style="color:#1d1305">${I.tank}</span><b>ModPack Studio</b><span class="crumb">/ Тактический модпак</span>
+      <div class="search">${I.search}Поиск модов, действий, настроек…<span class="kbd">Ctrl K</span></div>
+      <div class="wc"><i>—</i><i>▢</i><i>✕</i></div></div>
+    <aside class="side">
+      <div class="proj"><span class="av" style="color:#fff">${I.tank.replace('<svg', '<svg width="20" height="20"')}</span><div><b>Тактический модпак</b><small>версия 2.4 · 24 мода</small></div></div>
+      ${nav.slice(0, 6).map(([ic, n, c]) => `<div class="nav ${n === active ? 'on' : ''}">${I[ic]}${n}${c ? `<span class="cnt">${c}</span>` : ''}${n === 'Состав модпака' && theme !== 'light' ? '' : ''}</div>`).join('')}
+      <div class="lab">Аудитория</div>
+      ${nav.slice(6).map(([ic, n]) => `<div class="nav ${n === active ? 'on' : ''}">${I[ic]}${n}</div>`).join('')}
+      <div class="nav">${I.gear}Настройки</div>
+      <div class="foot"><b>Вышел патч 1.47</b><small>3 мода могут быть несовместимы — проверить</small></div>
+    </aside>
+    <main class="main">${body}</main>${extra}
+  </div>`;
+}
+
+const dashboard = (theme, a = art.hangar) => shell(theme, 'Обзор', `
+  <div class="hero" style="--art:${a}">${tankArt(theme === 'neon' ? '#c08bff' : '#ffb24a')}
+    <div class="ver"><span class="chip ok">● Опубликован</span><span class="chip" style="background:rgba(255,255,255,.08);color:#fff;border-color:rgba(255,255,255,.14)">v2.4 · 21 октября</span></div>
+    <h1>Тактический модпак</h1>
+    <p>Прицелы, ХП-бары, калькулятор урона и тихий ангар — всё для рандома в одном установщике.</p>
+    <div class="acts"><span class="btn p">${I.hammer}Собрать 2.5</span><span class="btn">${I.play}Проверить установщик</span><span class="btn">${I.brush}Оформление</span></div>
+    <div class="badge"><b>12 480</b>скачиваний</div>
+  </div>
+  <div class="stats">
+    <div class="card stat"><small>Модов</small><b>24</b><div class="d">+3 в этой версии</div>${spark([8, 10, 9, 14, 16, 18, 24], '#5cc98a')}</div>
+    <div class="card stat"><small>Скачиваний за неделю</small><b>1 932</b><div class="d">▲ 18%</div>${spark([6, 12, 10, 18, 15, 24, 28], getAcc(theme))}</div>
+    <div class="card stat"><small>Размер установщика</small><b>184 МБ</b><div class="d" style="color:var(--muted)">дельта-обновление 12 МБ</div></div>
+    <div class="card stat"><small>Популярный мод</small><b style="font-size:19px;margin-top:10px">Прицел «Тактик»</b><div class="d" style="color:var(--muted)">выбирают 87%</div></div>
+  </div>
+  <div class="grid2">
+    <div class="card todo"><div class="h">Что дальше</div>
+      <div class="todo-i"><span class="ic" style="background:color-mix(in srgb,var(--bad) 16%,transparent);color:var(--bad)">${I.alert}</span><div><b>3 мода не проверены на патче 1.47</b><small>ХП-бар, Калькулятор урона, Зум x30</small></div><span class="btn">Проверить</span></div>
+      <div class="todo-i"><span class="ic" style="background:color-mix(in srgb,var(--acc) 16%,transparent);color:var(--acc)">${I.refresh}</span><div><b>Автор обновил «Прицел Тактик» до 3.1</b><small>изменения: новые сетки, исправлен вылет</small></div><span class="btn">Обновить</span></div>
+      <div class="todo-i"><span class="ic" style="background:color-mix(in srgb,var(--info) 16%,transparent);color:var(--info)">${I.brush}</span><div><b>У экрана «Авторы» нет ссылок</b><small>иконки соцсетей пока никуда не ведут</small></div><span class="btn">Открыть</span></div>
+    </div>
+    <div class="card tl"><div class="h" style="margin-bottom:6px">Версии</div>
+      <div class="tl-i cur"><i></i><div><b>2.5 — черновик</b><small>+ Зум x30, обновлён прицел</small></div><span>сейчас</span></div>
+      <div class="tl-i"><i></i><div><b>2.4</b><small>патч 1.46, новый дизайн установщика</small></div><span>21 окт</span></div>
+      <div class="tl-i"><i></i><div><b>2.3</b><small>+ ХП-бары, наборы модов</small></div><span>2 окт</span></div>
+      <div class="tl-i"><i></i><div><b>2.2</b><small>исправлен калькулятор урона</small></div><span>14 сен</span></div>
+    </div>
+  </div>`);
+
+function getAcc(t) { return t === 'light' ? '#e2741f' : t === 'neon' ? '#b06cff' : '#f0a53a'; }
+
+const mods = [
+  ['scope', 'Прицел «Тактик»', 'Сведение, таймер перезарядки и запас ХП цели.', 'Прицелы', 4.9, true],
+  ['hp', 'ХП-бары команд', 'Полоски здоровья обеих команд вверху экрана.', 'Интерфейс', 4.7, true],
+  ['map', 'Расширенная миникарта', 'Круги обзора, линия направления орудия.', 'Миникарта', 4.8, true],
+  ['dmg', 'Калькулятор урона', 'Урон, ассист и блок прямо в бою.', 'Интерфейс', 4.6, false],
+  ['zoom', 'Зум x30', 'Многократный зум снайперского режима.', 'Камера', 4.4, true],
+  ['sound', 'Тихий ангар', 'Без музыки и фоновых звуков в ангаре.', 'Звук', 4.2, false],
+];
+const showcase = () => shell('', 'Состав модпака', `
+  <div class="toolbar"><span class="h">Состав модпака</span><span class="chip on">Все · 24</span><span class="chip">Прицелы</span><span class="chip">Интерфейс</span><span class="chip">Миникарта</span><span class="chip warn">⚠ Конфликты · 1</span></div>
+  <div class="mods" style="width:calc(100% - 396px)">
+    ${mods.map(([k, n, d, cat, r, on], i) => `<div class="card mod ${i === 0 ? 'active' : ''}"><div class="pv" style="background:${pvBg[i]}">${preview[k]('#ffb24a')}<span class="chip tag" style="background:rgba(0,0,0,.45);color:#fff;border-color:rgba(255,255,255,.12)">${cat}</span><span class="sel ${on ? '' : 'off'}" style="color:#1d1305">${on ? I.check : ''}</span></div>
+      <div class="bd"><b>${n}</b><p>${d}</p><div class="meta">${i === 3 ? '<span class="chip bad">конфликт</span>' : i === 4 ? '<span class="chip warn">патч 1.46</span>' : '<span class="chip ok">1.47 ✓</span>'}<span class="r">★ ${r}</span></div></div></div>`).join('')}
+  </div>
+  <div class="drawer">
+    <div class="big" style="background:${pvBg[0]}">${preview.scope('#ffb24a').replace('width="140"', 'width="260"')}<span class="chip" style="position:absolute;right:14px;top:14px;background:rgba(0,0,0,.5);color:#fff;border-color:rgba(255,255,255,.15)">${I.play.replace('<svg', '<svg width="10" height="10"')} Видео</span></div>
+    <div class="thumbs"><i class="on" style="background:${pvBg[0]}"></i><i></i><i></i><i></i></div>
+    <div class="in"><div style="display:flex;gap:6px;margin-bottom:8px"><span class="chip ok">1.47 ✓</span><span class="chip">by Tactic_Lab</span></div><h3>Прицел «Тактик»</h3>
+      <p class="mut" style="margin-top:6px;line-height:1.5;font-size:12.5px">Минималистичный прицел со сведением, таймером перезарядки и запасом прочности цели.</p>
+      <div class="kv"><div><small>Версия</small><b>3.1</b></div><div><small>Размер</small><b>1,8 МБ</b></div><div><small>Выбирают</small><b>87%</b></div><div><small>Обновлён</small><b>2 дня назад</b></div></div>
+      <div style="margin-top:14px" class="h">Настройки для игрока</div>
+      <div class="opt">Цвет прицела<span class="swatches"><i class="on" style="background:#ffb24a"></i><i style="background:#5cc98a"></i><i style="background:#6aa8ff"></i><i style="background:#ef5d55"></i></span></div>
+      <div class="opt">Таймер перезарядки<span class="tgl"></span></div>
+      <div class="opt" style="border:0">Запас ХП цели<span class="tgl off"></span></div>
+    </div>
+  </div>`);
+
+const palette = () => shell('', 'Обзор', dashboardBody(), `<div class="dim"></div>
+  <div class="palette">
+    <div class="q">${I.search.replace('width="14" height="14"', 'width="20" height="20"')}<span>при</span><span class="caret"></span><span class="kbd" style="margin-left:auto">Esc</span></div>
+    <div class="grp">Моды</div>
+    <div class="it on"><span class="ic" style="background:${pvBg[0]}">${preview.scope('#ffb24a').replace('width="140"', 'width="34"')}</span><span><mark>При</mark>цел «Тактик» <small>в модпаке · 3.1</small></span><span class="kbd">Enter</span></div>
+    <div class="it"><span class="ic" style="background:${pvBg[1]}">${preview.scope('#6aa8ff').replace('width="140"', 'width="34"')}</span><span><mark>При</mark>цел «Снайпер» <small>каталог · добавить</small></span></div>
+    <div class="grp">Действия</div>
+    <div class="it"><span class="ic" style="color:var(--acc)">${I.hammer}</span><span><mark>При</mark>нять обновления модов <small>3 мода</small></span><span class="kbd">Ctrl B</span></div>
+    <div class="it"><span class="ic" style="color:var(--acc)">${I.brush}</span><span><mark>При</mark>менить дизайн «Кинематограф»</span></div>
+    <div class="it"><span class="ic" style="color:var(--acc)">${I.play}</span><span>Открыть установщик для <mark>про</mark>верки</span><span class="kbd">F5</span></div>
+    <div class="grp">Настройки</div>
+    <div class="it"><span class="ic">${I.gear}</span><span>Тема студии <small>Тактика · Светлая · Неон</small></span></div>
+    <div class="ft"><span>↑↓ выбрать</span><span>Enter открыть</span><span>Tab — только действия</span><span style="margin-left:auto">ModPack Studio</span></div>
+  </div>`);
+function dashboardBody() { const h = dashboard(''); return h.slice(h.indexOf('<main class="main">') + 19, h.lastIndexOf('</main>')); }
+
+const build = () => shell('neon', 'Сборка', `
+  <div class="build">
+    <div class="card" style="padding:22px">
+      <div style="display:flex;align-items:center;gap:10px"><span class="h" style="font-size:22px">Сборка 2.5</span><span class="chip warn">идёт · 0:41</span><span class="btn" style="margin-left:auto">Отменить</span></div>
+      <div class="ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="none" stroke="var(--s3)" stroke-width="7"/><circle cx="50" cy="50" r="44" fill="none" stroke="url(#rg)" stroke-width="7" stroke-linecap="round" stroke-dasharray="276.5" stroke-dashoffset="80"/><defs><linearGradient id="rg"><stop offset="0" stop-color="#6ce4ff"/><stop offset="1" stop-color="#b06cff"/></linearGradient></defs></svg><div class="c"><div><b>71%</b><span class="mut">упаковка модов</span></div></div></div>
+      <div class="steps">
+        <div class="step done"><span class="st">${I.check}</span><div><b>Проверка проекта</b><small>24 мода, конфликтов нет, все совместимы с 1.47</small></div><span class="t">0:02</span></div>
+        <div class="step done"><span class="st">${I.check}</span><div><b>Сборка окна установщика</b><small>6 экранов, тема «Неон-аркада»</small></div><span class="t">0:09</span></div>
+        <div class="step run"><span class="st"></span><div style="flex:1"><b>Упаковка модов</b><small>17 из 24 · tactic_scope_3.1.mtmod</small><div class="bar"><i style="width:71%"></i></div></div><span class="t">0:30</span></div>
+        <div class="step wait"><span class="st"></span><div><b>Контрольные суммы и дельта-обновление</b><small>ожидает</small></div></div>
+        <div class="step wait"><span class="st"></span><div><b>Публикация на GitHub</b><small>после сборки</small></div></div>
+      </div>
+    </div>
+    <div class="card release">
+      <div class="top" style="--art:${art.neon}">${tankArt('#c08bff', .42)}<span class="chip" style="align-self:flex-start;background:rgba(0,0,0,.45);color:#fff;border-color:rgba(255,255,255,.15);margin-bottom:auto">Предыдущая · 2.4</span><h3>Тактический модпак 2.4</h3><span style="opacity:.75;font-size:12px;margin-top:4px">опубликован 21 октября · 12 480 скачиваний</span></div>
+      <div class="rb">
+        <div class="file"><span class="ic">${I.file}</span><div><b>Tactic-Modpack-2.4.exe</b><small>184 МБ · SHA-256 проверен</small></div><span class="btn" style="margin-left:auto;height:28px">Открыть</span></div>
+        <div class="h" style="font-size:13px">Что нового</div>
+        <ul class="notes"><li>Новый дизайн установщика «Неон-аркада»</li><li>Совместимость с патчем 1.46</li><li>Наборы «Рекомендуемый» и «Минимальный»</li></ul>
+        <div style="display:flex;gap:8px;margin-top:auto"><span class="btn p" style="flex:1;justify-content:center">${I.upload}Опубликовать</span><span class="btn">Скопировать ссылку</span></div>
+      </div>
+    </div>
+  </div>`, `<div class="confetti">${Array.from({ length: 26 }, (_, i) => `<i style="left:${1010 + ((i * 47) % 250)}px;top:${66 + ((i * 29) % 60)}px;background:${['#b06cff', '#6ce4ff', '#ffcf7a', '#5cf2c0'][i % 4]};transform:rotate(${i * 37}deg)"></i>`).join('')}</div>`);
+
+const settings = () => shell('light', '', `
+  <div style="display:flex;align-items:baseline;gap:12px"><span class="h" style="font-size:22px">Оформление студии</span><span class="mut">меняется сразу, без перезапуска</span></div>
+  <div class="themes">
+    ${[['Тактика', '#0e0f12', '#17191d', '#f0a53a', ''], ['Светлая', '#f3f1ec', '#ffffff', '#e2741f', 'on'], ['Неон', '#0c0a14', '#1d1734', '#b06cff', ''], ['Сталь', '#0d1117', '#1c2330', '#4f9be8', ''], ['Хаки', '#12140f', '#22261c', '#a3b55a', ''], ['Из баннера модпака', 'linear-gradient(135deg,#2b2117,#120d09)', 'rgba(255,255,255,.08)', '#ffb24a', '']]
+      .map(([n, b, s, a, on]) => `<div class="th ${on}"><div class="mini" style="background:${b}"><div class="ms" style="background:${s};box-shadow:inset 3px 0 0 ${a}"></div><div class="mm" style="background:${s}"><i style="width:60%;background:${a}"></i><i style="width:85%;background:${on ? '#ddd' : 'rgba(255,255,255,.12)'}"></i><i style="width:40%;background:${on ? '#e6e6e6' : 'rgba(255,255,255,.08)'}"></i><i style="margin-top:auto;width:34%;height:14px;background:${a}"></i></div></div><div class="lbl">${n}${on ? `<span class="chip on" style="height:20px">выбрана</span>` : ''}</div></div>`).join('')}
+  </div>
+  <div class="card" style="margin-top:16px;padding:4px 18px">
+    <div class="row"><div><b>Режим</b><small>Светлая и тёмная тема могут переключаться вместе с Windows</small></div><div class="segt"><span>Тёмная</span><span>Светлая</span><span class="on">Как в Windows</span></div></div>
+    <div class="row"><div><b>Стекло (Mica)</b><small>Полупрозрачное окно, сквозь которое видны обои рабочего стола</small></div><span class="tgl"></span></div>
+    <div class="row"><div><b>Обои студии</b><small>Градиент темы, баннер модпака или своя картинка</small></div><div class="segt"><span>Градиент</span><span class="on">Баннер</span><span>Своя</span></div></div>
+    <div class="row"><div><b>Размер интерфейса</b><small>110%</small></div><div class="slider"><i style="width:55%"></i></div></div>
+    <div class="row" style="border:0"><div><b>Анимации и звуки интерфейса</b><small>Переходы между разделами, конфетти при публикации</small></div><span class="tgl"></span></div>
+  </div>`);
+
+const editor = () => shell('', 'Оформление', `
+  <div class="ed">
+    <div class="card pnl"><div class="lab" style="color:var(--muted);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;padding:2px 6px 8px">Экраны</div>
+      ${['Приветствие', 'О модпаке', 'Выбор модов', 'Установка', 'Готово'].map((n, i) => `<div class="lay ${i === 0 ? 'on' : ''}">${I.square}${n}</div>`).join('')}
+      <div class="lab" style="color:var(--muted);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;padding:14px 6px 8px">Слои</div>
+      ${[['text', 'Заголовок'], ['text', 'Описание'], ['square', 'Кнопка «Выбрать моды»'], ['square', 'Кнопка «О модпаке»'], ['img', 'Логотип'], ['img', 'Фон']].map(([ic, n], i) => `<div class="lay ${i === 0 ? 'on' : ''}">${I[ic]}${n}</div>`).join('')}
+    </div>
+    <div class="canvas">
+      <div class="shot" style="--art:${art.hangar}">${tankArt('#ffb24a', .5)}
+        <div style="position:absolute;left:26px;top:20px;display:flex;gap:8px;align-items:center;color:#fff;font-size:11px"><span class="logo" style="width:20px;height:20px;color:#1d1305">${I.tank}</span><b>Тактический модпак</b></div>
+        <div style="position:absolute;left:26px;top:92px;font:750 30px/1 'Segoe UI Variable Display',sans-serif;color:#fff;background:linear-gradient(90deg,#fff,#ffcf7a);-webkit-background-clip:text;color:transparent">ТАКТИЧЕСКИЙ<br>МОДПАК</div>
+        <div class="selbox" style="left:20px;top:86px;width:212px;height:72px"><i style="left:-5px;top:-5px"></i><i style="right:-5px;top:-5px"></i><i style="left:-5px;bottom:-5px"></i><i style="right:-5px;bottom:-5px"></i></div>
+        <div style="position:absolute;left:26px;top:170px;width:230px;color:rgba(255,255,255,.75);font-size:11px;line-height:1.5">Прицелы, ХП-бары и калькулятор урона в одном установщике.</div>
+        <div style="position:absolute;left:26px;top:224px;display:flex;gap:8px"><span class="btn p" style="height:30px;font-size:11px">Выбрать моды</span><span class="btn" style="height:30px;font-size:11px;background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.18)">О модпаке</span></div>
+      </div>
+      <div class="floatbar"><i class="on">${I.cursor}</i><i>${I.text}</i><i>${I.square}</i><i>${I.img}</i><i style="width:1px;background:var(--line2);margin:4px 3px"></i><i>${I.play}</i></div>
+      <span class="chip" style="position:absolute;left:14px;top:14px">100% · 1100×700</span>
+      <span class="chip ok" style="position:absolute;right:14px;top:14px">● Автопроверка: всё в порядке</span>
+    </div>
+    <div class="card pnl"><div class="h">Заголовок</div>
+      <div class="prop"><label>Текст</label><div class="fld">{welcomeTitle}</div></div>
+      <div class="prop"><label>Шрифт</label><div class="two"><div class="fld">Bahnschrift</div><div class="fld">34 · Bold</div></div></div>
+      <div class="prop"><label>Заливка</label><div class="fld"><span style="width:16px;height:16px;border-radius:4px;background:linear-gradient(90deg,#fff,#ffcf7a)"></span>Градиент · 90°</div></div>
+      <div class="prop"><label>Появление</label><div class="two"><div class="fld">Пружина</div><div class="fld">задержка 150</div></div></div>
+      <div class="prop"><label>Наведение</label><div class="segt"><span class="on">Свечение</span><span>Подъём</span><span>Нет</span></div></div>
+      <div class="prop"><label>Прозрачность</label><div class="slider" style="width:100%;margin-top:12px"><i style="width:100%"></i></div></div>
+    </div>
+  </div>`);
+
+const refs = [
+  ['01', 'Обзор проекта — тема «Тактика»', 'Главный экран вместо пустого старта: баннер модпака с картинкой, ключевые цифры, подсказки «что дальше» (патч, обновления модов, недочёты дизайна) и лента версий.', dashboard('')],
+  ['02', 'Витрина модов с карточкой мода', 'Моды крупными карточками с превью, метками совместимости и конфликтов. Справа — подробная карточка: галерея, видео, цифры и настройки, которые сможет менять игрок.', showcase()],
+  ['03', 'Командная палитра Ctrl+K', 'Одно окно поиска для всего: моды проекта и каталога, действия (собрать, проверить, применить дизайн), настройки. Работает с клавиатуры.', palette()],
+  ['04', 'Сборка и карточка релиза — тема «Неон»', 'Сборка по этапам с кольцом прогресса вместо лога. Справа — карточка релиза с файлом, «Что нового» и публикацией в один клик; при успехе конфетти.', build()],
+  ['05', 'Настройки оформления — светлая тема', 'Выбор темы с живыми миниатюрами, режим «как в Windows», стекло Mica, обои из баннера модпака, размер интерфейса и анимации.', settings()],
+  ['06', 'Редактор дизайна установщика в новом стиле', 'Тот же холст, но в новой оболочке: стеклянные панели, плавающая панель инструментов, статус автопроверки, свойства элемента сгруппированы.', editor()],
+];
+const root = document.getElementById('refs');
+root.innerHTML = refs.map(([n, t, d, h]) => `<section class="ref"><div class="ref-head"><span class="n">${n}</span><h2>${t}</h2><p>${d}</p></div><div class="stage">${h}</div></section>`).join('');
+function fit() {
+  document.querySelectorAll('.stage').forEach((s) => {
+    const w = s.querySelector('.win'); const k = Math.min(1, s.clientWidth / 1280);
+    w.style.transform = `scale(${k})`; s.style.height = `${800 * k}px`;
+  });
+}
+addEventListener('resize', fit); fit();
+</script>
+</body>
+</html>
