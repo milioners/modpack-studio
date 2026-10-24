@@ -48,7 +48,7 @@ async function main() {
     overwrite: true,
     prune: true,
     asar: false, // Inno Setup при сборке модпаков читает файлы каталога напрямую
-    ignore: [/^\/(tests|scripts|dist|installer|catalog-online|screenshots)(\/|$)/, /^\/CHANGELOG\.md$/, /^\/build\/icon\.png$/, /\.md$/, /^\/catalog\/catalog\.json\.tmp$/],
+    ignore: [/^\/(tests|scripts|dist|installer|catalog-online|screenshots|docs|design-refs)(\/|$)/, /^\/CHANGELOG\.md$/, /^\/build\/icon\.png$/, /\.md$/, /^\/catalog\/catalog\.json\.tmp$/],
     appCopyright: `© ${new Date().getFullYear()} ${pkg.author}`,
     win32metadata: {
       CompanyName: pkg.author,
