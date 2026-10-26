@@ -1,0 +1,20 @@
+<script>
+// Заглушки Gameface для превью страницы мода в TankAir Studio: engine, viewEnv и window.model
+// с образцом данных из preview.json мода. Сообщения страницы собираются в window.__logs.
+window.__logs = [];
+var __handlers = {};
+window.engine = { whenReady: Promise.resolve(), on: function (n, f) { (__handlers[n] = __handlers[n] || []).push(f); }, off: function () {}, trigger: function () {} };
+window.viewEnv = {
+  addDataChangedCallback: function () { return 1; },
+  getViewSizeRem: function () { return { width: innerWidth, height: innerHeight }; },
+  setHitAreaPaddingsRem: function () {}
+};
+window.model = {
+  data: __DATA__,
+  onAction: function (a) { window.__logs.push('action ' + JSON.stringify(a)); },
+  onLog: function (a) { window.__logs.push(String(a && a.msg)); },
+  onReady: function (a) { window.__logs.push('ready ' + JSON.stringify(a)); }
+};
+window.addEventListener('error', function (e) { window.__logs.push('ошибка JS: ' + e.message); });
+</script>
+<style>html { font-size: 1px; background: #3a3d42 radial-gradient(1200px 700px at 50% 40%, #545a62, #1c1e22); } body { font-family: "Warhelios", "Segoe UI", sans-serif; }</style>

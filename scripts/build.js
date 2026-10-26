@@ -8,6 +8,7 @@ const path = require('path');
 const { packager } = require('@electron/packager');
 const { findIscc, compileIss } = require('../src/core/inno');
 const pkg = require('../package.json');
+const { bundleTools } = require('./tools');
 
 const ROOT = path.join(__dirname, '..');
 const DIST = path.resolve(process.env.DIST_DIR || path.join(ROOT, 'dist'));
@@ -48,7 +49,7 @@ async function main() {
     overwrite: true,
     prune: true,
     asar: false, // Inno Setup при сборке модпаков читает файлы каталога напрямую
-    ignore: [/^\/(tests|scripts|dist|installer|catalog-online|screenshots|docs|design-refs)(\/|$)/, /^\/CHANGELOG\.md$/, /^\/build\/icon\.png$/, /\.md$/, /^\/catalog\/catalog\.json\.tmp$/],
+    ignore: [/^\/(tests|scripts|dist|installer|catalog-online|screenshots|docs|design-refs|tools)(\/|$)/, /^\/CHANGELOG\.md$/, /^\/build\/icon\.png$/, /\.md$/, /^\/catalog\/catalog\.json\.tmp$/],
     appCopyright: `© ${new Date().getFullYear()} ${pkg.author}`,
     win32metadata: {
       CompanyName: pkg.author,
@@ -58,6 +59,9 @@ async function main() {
     },
   });
   console.log(`   → ${appDir}`);
+  // сборщики Мастерской модов: Python 2.7 как у игры и Haxe для Flash-экранов
+  const t = bundleTools(path.join(appDir, 'resources', 'tools'));
+  console.log(`   + сборщики Мастерской: Python 2.7 ${(t.python / 1e6).toFixed(1)} МБ, Haxe ${(t.haxe / 1e6).toFixed(1)} МБ`);
 
   console.log('2/2 Сборка установщика Inno Setup…');
   const exeName = `${pkg.productName}.exe`;

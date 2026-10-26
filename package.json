@@ -1,14 +1,14 @@
 {
   "name": "tankair-studio",
   "productName": "TankAir Studio",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Конструктор модпаков для «Мира танков»",
   "main": "src/main/main.js",
   "author": "TankAir Studio",
   "license": "MIT",
   "scripts": {
     "start": "electron .",
-    "test": "node --test tests/core.test.js tests/online.test.js tests/installer.test.js",
+    "test": "node --test tests/core.test.js tests/online.test.js tests/installer.test.js tests/workshop.test.js",
     "dist": "node scripts/build.js",
     "catalog": "node scripts/catalog.js",
     "release": "node scripts/release.js"

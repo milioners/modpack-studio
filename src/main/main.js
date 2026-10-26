@@ -21,6 +21,7 @@ const mps = require('../core/mpsinstaller');
 const layout = require('../core/layout');
 const { designs } = require('../core/designs');
 const { spawn, execFile } = require('child_process');
+const workshopIpc = require('./workshop-ipc');
 
 const APP_ROOT = path.join(__dirname, '..', '..');
 const DEMO_CATALOG = path.join(APP_ROOT, 'catalog');
@@ -602,6 +603,18 @@ function registerIpc() {
     spawn(exe, ['--preview'], { detached: true, stdio: 'ignore' }).unref();
   });
   handle('publish:github', (data) => publishGithub(data, (l) => win?.webContents.send('build:log', l)));
+
+  // Мастерская модов, справочник игры и отладчик
+  workshopIpc.register({
+    handle, app, dialog, shell, getWin: () => win, settings: () => settings, saveSettings,
+    addModToProject: (data, file, meta) => {
+      const cur = accept(data);
+      const node = Object.assign(modFromSource(cur.dir, file), meta);
+      cur.data.tree.push(node);
+      project.save(cur.dir, cur.data);
+      return { project: projectState(), added: node.id };
+    },
+  });
 
   handle('shell:open', (p) => shell.openPath(p));
   handle('shell:show', (p) => shell.showItemInFolder(p));

@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Мастерская модов — референсы</title>
+<style>
+  :root { --page: #0a0b0d; --page-text: #e9e4d9; --page-muted: #8a857b; }
+  * { box-sizing: border-box; margin: 0; }
+  body { background: var(--page); color: var(--page-text); font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; padding: 48px 16px 80px; }
+  .page { max-width: 1320px; margin: 0 auto; }
+  .page > header { margin-bottom: 40px; }
+  .page > header h1 { font: 700 34px/1.1 "Segoe UI Variable Display", "Segoe UI", sans-serif; letter-spacing: -0.02em; }
+  .page > header p { color: var(--page-muted); margin-top: 10px; font-size: 15px; max-width: 760px; line-height: 1.5; }
+  .ref { margin: 56px 0 0; }
+  .ref-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 14px; flex-wrap: wrap; }
+  .ref-head .n { font: 700 13px/1 Consolas, monospace; color: #f0a53a; border: 1px solid #f0a53a55; padding: 5px 8px; border-radius: 6px; }
+  .ref-head h2 { font: 650 22px/1.2 "Segoe UI Variable Display", "Segoe UI", sans-serif; }
+  .ref-head p { color: var(--page-muted); font-size: 14px; flex-basis: 100%; line-height: 1.5; }
+  .stage { width: 100%; overflow: hidden; border-radius: 14px; }
+  .stage > .win { transform-origin: 0 0; }
+
+  /* ---------- окно студии ---------- */
+  .win {
+    --bg: #0e0f12; --s1: rgba(23,25,29,.72); --s2: rgba(33,36,42,.78); --s3: rgba(45,48,56,.9); --line: rgba(255,255,255,.07); --line2: rgba(255,255,255,.12);
+    --text: #efe9dd; --text2: #b9b3a7; --muted: #7f7a71; --acc: #f0a53a; --acc2: #ffcf7a; --accText: #1d1305; --ok: #5cc98a; --bad: #ef5d55; --info: #6aa8ff;
+    --wall: radial-gradient(900px 520px at 85% -10%, rgba(240,165,58,.22), transparent 60%), radial-gradient(700px 500px at -10% 110%, rgba(90,120,170,.18), transparent 60%), linear-gradient(160deg, #121418, #0b0c0f);
+    width: 1280px; height: 800px; position: relative; border-radius: 14px; overflow: hidden; color: var(--text);
+    background: var(--wall); border: 1px solid var(--line2); box-shadow: 0 30px 80px rgba(0,0,0,.55);
+    display: grid; grid-template-columns: 232px 1fr; grid-template-rows: 44px 1fr; font-size: 13px;
+  }
+  .win.light {
+    --bg: #f3f1ec; --s1: rgba(255,255,255,.7); --s2: rgba(255,255,255,.9); --s3: #ece8e0; --line: rgba(20,20,30,.08); --line2: rgba(20,20,30,.12);
+    --text: #1c1d21; --text2: #4a4c55; --muted: #8b8d96; --acc: #e2741f; --acc2: #f59a4a; --accText: #fff;
+    --wall: radial-gradient(900px 520px at 85% -10%, rgba(226,116,31,.18), transparent 60%), radial-gradient(700px 500px at -10% 110%, rgba(80,140,220,.16), transparent 60%), linear-gradient(160deg, #f7f5f0, #ebe8e1);
+    box-shadow: 0 30px 80px rgba(0,0,0,.35);
+  }
+  .win.neon {
+    --s1: rgba(24,18,44,.62); --s2: rgba(36,28,66,.7); --s3: rgba(54,42,96,.8); --line: rgba(190,160,255,.10); --line2: rgba(190,160,255,.18);
+    --text: #f1ecff; --text2: #c1b8e0; --muted: #8a80ad; --acc: #b06cff; --acc2: #6ce4ff; --accText: #12061f;
+    --wall: radial-gradient(900px 600px at 90% -10%, rgba(176,108,255,.35), transparent 60%), radial-gradient(800px 600px at -10% 110%, rgba(60,220,255,.20), transparent 60%), linear-gradient(160deg, #110c22, #07060e);
+  }
+  .tb { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; padding: 0 0 0 16px; border-bottom: 1px solid var(--line); background: rgba(0,0,0,.08); backdrop-filter: blur(20px); }
+  .light .tb { background: rgba(255,255,255,.35); }
+  .logo { width: 22px; height: 22px; border-radius: 7px; background: linear-gradient(135deg, var(--acc2), var(--acc)); display: grid; place-items: center; box-shadow: 0 0 18px color-mix(in srgb, var(--acc) 50%, transparent); }
+  .logo svg { width: 13px; height: 13px; }
+  .tb b { font-weight: 650; font-size: 13px; }
+  .tb .crumb { color: var(--muted); }
+  .tb .search { margin-left: auto; margin-right: auto; width: 380px; height: 28px; border-radius: 8px; background: var(--s2); border: 1px solid var(--line); display: flex; align-items: center; gap: 8px; padding: 0 10px; color: var(--muted); font-size: 12px; transform: translateX(-80px); }
+  .kbd { margin-left: auto; font: 600 10.5px/1 Consolas, monospace; border: 1px solid var(--line2); border-radius: 5px; padding: 3px 5px; color: var(--text2); background: var(--s1); }
+  .wc { display: flex; height: 100%; }
+  .wc i { width: 46px; display: grid; place-items: center; color: var(--muted); font-style: normal; }
+
+  .side { padding: 14px 10px; display: flex; flex-direction: column; gap: 2px; border-right: 1px solid var(--line); background: rgba(0,0,0,.12); backdrop-filter: blur(30px); }
+  .light .side { background: rgba(255,255,255,.4); }
+  .side .proj { display: flex; gap: 10px; align-items: center; padding: 8px; border-radius: 12px; background: var(--s1); border: 1px solid var(--line); margin-bottom: 12px; }
+  .side .proj .av { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #3b2a12, #7a4d16); display: grid; place-items: center; }
+  .neon .side .proj .av { background: linear-gradient(135deg, #2b145a, #6d34c9); }
+  .light .side .proj .av { background: linear-gradient(135deg, #ffd9b0, #f2a35e); }
+  .side .proj small { display: block; color: var(--muted); font-size: 11px; }
+  .side .lab { color: var(--muted); font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; padding: 12px 10px 6px; }
+  .nav { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; color: var(--text2); position: relative; }
+  .nav svg { width: 16px; height: 16px; opacity: .85; }
+  .nav.on { background: var(--s2); color: var(--text); box-shadow: inset 0 0 0 1px var(--line); }
+  .nav.on::before { content: ""; position: absolute; left: -10px; top: 9px; bottom: 9px; width: 3px; border-radius: 3px; background: var(--acc); box-shadow: 0 0 10px var(--acc); }
+  .nav .cnt { margin-left: auto; font-size: 11px; color: var(--muted); }
+  .nav .dot { margin-left: auto; width: 7px; height: 7px; border-radius: 50%; background: var(--bad); box-shadow: 0 0 8px var(--bad); }
+  .side .foot { margin-top: auto; padding: 12px; border-radius: 12px; background: linear-gradient(135deg, color-mix(in srgb, var(--acc) 22%, transparent), transparent); border: 1px solid color-mix(in srgb, var(--acc) 30%, transparent); }
+  .side .foot b { display: block; font-size: 12.5px; }
+  .side .foot small { color: var(--text2); font-size: 11.5px; line-height: 1.4; display: block; margin-top: 4px; }
+
+  .main { padding: 22px 26px; overflow: hidden; position: relative; }
+  .card { background: var(--s1); border: 1px solid var(--line); border-radius: 16px; backdrop-filter: blur(24px); }
+  .btn { display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 14px; border-radius: 9px; font-weight: 600; font-size: 12.5px; border: 1px solid var(--line2); background: var(--s2); color: var(--text); white-space: nowrap; }
+  .btn.p { background: linear-gradient(180deg, var(--acc2), var(--acc)); color: var(--accText); border: 0; box-shadow: 0 6px 22px color-mix(in srgb, var(--acc) 40%, transparent), inset 0 1px 0 rgba(255,255,255,.35); }
+  .btn svg { width: 14px; height: 14px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 9px; border-radius: 999px; font-size: 11.5px; background: var(--s2); border: 1px solid var(--line); color: var(--text2); white-space: nowrap; }
+  .chip.ok { color: var(--ok); background: color-mix(in srgb, var(--ok) 12%, transparent); border-color: color-mix(in srgb, var(--ok) 25%, transparent); }
+  .chip.warn { color: var(--acc); background: color-mix(in srgb, var(--acc) 12%, transparent); border-color: color-mix(in srgb, var(--acc) 28%, transparent); }
+  .chip.bad { color: var(--bad); background: color-mix(in srgb, var(--bad) 12%, transparent); border-color: color-mix(in srgb, var(--bad) 25%, transparent); }
+  .chip.on { background: var(--acc); color: var(--accText); border-color: transparent; font-weight: 600; }
+  .h { font: 650 15px/1.2 "Segoe UI Variable Display", "Segoe UI", sans-serif; }
+  .mut { color: var(--muted); }
+
+  /* дашборд */
+  .hero { height: 232px; border-radius: 20px; position: relative; overflow: hidden; border: 1px solid var(--line2);
+    background: linear-gradient(90deg, rgba(10,10,12,.92) 0%, rgba(10,10,12,.55) 45%, rgba(10,10,12,.1) 100%), var(--art); padding: 26px 28px; display: flex; flex-direction: column; }
+  .hero .ver { display: flex; gap: 8px; }
+  .hero h1 { font: 750 40px/1 "Segoe UI Variable Display", "Segoe UI", sans-serif; letter-spacing: -0.02em; margin-top: 14px; color: #fff; }
+  .hero p { color: rgba(255,255,255,.72); margin-top: 8px; max-width: 460px; line-height: 1.5; }
+  .hero .acts { margin-top: auto; display: flex; gap: 10px; }
+  .hero .acts .btn:not(.p) { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.14); color: #fff; backdrop-filter: blur(10px); }
+  .hero .badge { position: absolute; right: 22px; top: 22px; text-align: right; color: rgba(255,255,255,.75); font-size: 12px; }
+  .hero .badge b { display: block; font: 700 28px/1 "Segoe UI Variable Display", sans-serif; color: #fff; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 16px; }
+  .stat { padding: 14px 16px; position: relative; overflow: hidden; }
+  .stat small { color: var(--muted); font-size: 11.5px; }
+  .stat b { display: block; font: 700 26px/1.1 "Segoe UI Variable Display", sans-serif; margin-top: 6px; }
+  .stat .d { font-size: 11.5px; color: var(--ok); margin-top: 2px; }
+  .stat svg.sp { position: absolute; right: 12px; bottom: 12px; width: 92px; height: 34px; }
+  .grid2 { display: grid; grid-template-columns: 1.25fr 1fr; gap: 14px; margin-top: 14px; }
+  .todo { padding: 16px; }
+  .todo-i { display: flex; gap: 12px; align-items: center; padding: 11px 12px; border-radius: 12px; background: var(--s2); border: 1px solid var(--line); margin-top: 9px; }
+  .todo-i .ic { width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center; flex: none; }
+  .todo-i .ic svg { width: 16px; height: 16px; }
+  .todo-i b { font-weight: 600; font-size: 12.5px; display: block; }
+  .todo-i small { color: var(--muted); font-size: 11.5px; }
+  .todo-i .btn { margin-left: auto; height: 28px; padding: 0 10px; font-size: 11.5px; }
+  .tl { padding: 16px; }
+  .tl-i { display: grid; grid-template-columns: 14px 1fr auto; gap: 12px; align-items: start; padding: 9px 0; position: relative; }
+  .tl-i::before { content: ""; position: absolute; left: 6px; top: 24px; bottom: -10px; width: 2px; background: var(--line2); }
+  .tl-i:last-child::before { display: none; }
+  .tl-i i { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--acc); margin-top: 3px; background: var(--bg); }
+  .tl-i.cur i { background: var(--acc); box-shadow: 0 0 12px var(--acc); }
+  .tl-i b { font-size: 12.5px; }
+  .tl-i small { display: block; color: var(--muted); font-size: 11.5px; margin-top: 2px; }
+  .tl-i span { font-size: 11.5px; color: var(--text2); }
+
+  /* витрина */
+  .toolbar { display: flex; gap: 8px; align-items: center; margin-bottom: 16px; }
+  .toolbar .h { font-size: 22px; margin-right: 14px; white-space: nowrap; }
+  .seg { display: flex; padding: 3px; background: var(--s2); border: 1px solid var(--line); border-radius: 9px; margin-left: auto; }
+  .seg i { width: 30px; height: 26px; display: grid; place-items: center; border-radius: 6px; color: var(--muted); font-style: normal; }
+  .seg i.on { background: var(--s3); color: var(--text); }
+  .mods { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .mod { overflow: hidden; padding: 0; }
+  .mod .pv { height: 132px; position: relative; display: grid; place-items: center; overflow: hidden; }
+  .mod .pv .tag { position: absolute; left: 10px; top: 10px; }
+  .mod .pv .sel { position: absolute; right: 10px; top: 10px; width: 24px; height: 24px; border-radius: 8px; background: var(--acc); display: grid; place-items: center; box-shadow: 0 0 14px var(--acc); }
+  .mod .pv .sel.off { background: rgba(0,0,0,.4); border: 1.5px solid rgba(255,255,255,.4); box-shadow: none; }
+  .mod .bd { padding: 12px 14px 14px; }
+  .mod .bd b { font-size: 13.5px; font-weight: 650; }
+  .mod .bd p { color: var(--muted); font-size: 11.5px; margin-top: 4px; line-height: 1.45; }
+  .mod .meta { display: flex; gap: 6px; margin-top: 10px; align-items: center; }
+  .mod .meta .r { margin-left: auto; color: var(--text2); font-size: 11.5px; }
+  .mod.active { box-shadow: 0 0 0 1.5px var(--acc), 0 10px 40px color-mix(in srgb, var(--acc) 22%, transparent); }
+  .drawer { position: absolute; right: 0; top: 44px; bottom: 0; width: 380px; background: var(--s2); border-left: 1px solid var(--line2); backdrop-filter: blur(40px); padding: 0; box-shadow: -30px 0 60px rgba(0,0,0,.35); }
+  .drawer .big { height: 214px; position: relative; display: grid; place-items: center; }
+  .drawer .thumbs { display: flex; gap: 6px; padding: 10px 18px 0; }
+  .drawer .thumbs i { flex: 1; height: 44px; border-radius: 8px; background: var(--s3); border: 1px solid var(--line); }
+  .drawer .thumbs i.on { border-color: var(--acc); }
+  .drawer .in { padding: 14px 18px; }
+  .drawer h3 { font: 700 20px/1.2 "Segoe UI Variable Display", sans-serif; }
+  .kv { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+  .kv div { background: var(--s1); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; }
+  .kv small { display: block; color: var(--muted); font-size: 10.5px; }
+  .kv b { font-size: 12.5px; }
+  .opt { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 12.5px; }
+  .tgl { width: 34px; height: 20px; border-radius: 10px; background: var(--acc); position: relative; }
+  .tgl::after { content: ""; position: absolute; right: 2px; top: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; }
+  .tgl.off { background: var(--s3); }
+  .tgl.off::after { right: auto; left: 2px; }
+  .swatches { display: flex; gap: 6px; }
+  .swatches i { width: 20px; height: 20px; border-radius: 6px; border: 2px solid transparent; }
+  .swatches i.on { border-color: #fff; }
+
+  /* Ctrl+K */
+  .dim { position: absolute; inset: 0; background: rgba(5,5,8,.55); backdrop-filter: blur(6px); }
+  .palette { position: absolute; left: 50%; top: 96px; width: 640px; transform: translateX(-50%); border-radius: 18px; background: color-mix(in srgb, var(--s2) 92%, transparent); border: 1px solid var(--line2); box-shadow: 0 40px 100px rgba(0,0,0,.6); backdrop-filter: blur(40px); overflow: hidden; }
+  .palette .q { display: flex; align-items: center; gap: 12px; padding: 16px 18px; border-bottom: 1px solid var(--line); font-size: 17px; }
+  .palette .q .caret { width: 2px; height: 20px; background: var(--acc); margin-left: -10px; }
+  .palette .grp { color: var(--muted); font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; padding: 12px 18px 6px; }
+  .palette .it { display: flex; align-items: center; gap: 12px; padding: 9px 12px; margin: 0 6px; border-radius: 10px; font-size: 13px; }
+  .palette .it .ic { width: 30px; height: 30px; border-radius: 8px; background: var(--s3); display: grid; place-items: center; flex: none; overflow: hidden; }
+  .palette .it .ic svg { width: 15px; height: 15px; }
+  .palette .it small { color: var(--muted); margin-left: 6px; }
+  .palette .it .kbd { margin-left: auto; }
+  .palette .it.on { background: color-mix(in srgb, var(--acc) 16%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--acc) 35%, transparent); }
+  .palette .it mark { background: none; color: var(--acc); font-weight: 700; }
+  .palette .ft { display: flex; gap: 16px; padding: 10px 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11.5px; margin-top: 8px; }
+
+  /* сборка */
+  .build { display: grid; grid-template-columns: 1fr 400px; gap: 16px; height: 100%; }
+  .ring { width: 190px; height: 190px; position: relative; margin: 6px auto 0; }
+  .ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .ring .c { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; }
+  .ring .c b { font: 750 44px/1 "Segoe UI Variable Display", sans-serif; display: block; }
+  .steps { margin-top: 18px; display: flex; flex-direction: column; gap: 8px; }
+  .step { display: flex; gap: 12px; align-items: center; padding: 11px 14px; border-radius: 12px; background: var(--s2); border: 1px solid var(--line); }
+  .step .st { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; flex: none; }
+  .step.done .st { background: color-mix(in srgb, var(--ok) 20%, transparent); color: var(--ok); }
+  .step.run { border-color: color-mix(in srgb, var(--acc) 40%, transparent); background: color-mix(in srgb, var(--acc) 9%, var(--s2)); }
+  .step.run .st { border: 2.5px solid var(--acc); border-right-color: transparent; }
+  .step.wait .st { border: 2px dashed var(--line2); }
+  .step b { font-size: 12.5px; font-weight: 600; }
+  .step small { color: var(--muted); font-size: 11.5px; display: block; }
+  .step .t { margin-left: auto; color: var(--muted); font-size: 11.5px; font-family: Consolas, monospace; }
+  .bar { height: 4px; border-radius: 2px; background: var(--s3); overflow: hidden; margin-top: 6px; }
+  .bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--acc), var(--acc2)); border-radius: 2px; }
+  .release { padding: 0; overflow: hidden; display: flex; flex-direction: column; }
+  .release .top { height: 170px; position: relative; padding: 18px; background: linear-gradient(180deg, transparent 30%, rgba(0,0,0,.75)), var(--art); display: flex; flex-direction: column; justify-content: flex-end; color: #fff; }
+  .release .top h3 { font: 750 26px/1 "Segoe UI Variable Display", sans-serif; }
+  .release .rb { padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+  .file { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; background: var(--s2); border: 1px solid var(--line); }
+  .file .ic { width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, var(--acc2), var(--acc)); display: grid; place-items: center; }
+  .file b { font-size: 12.5px; }
+  .file small { display: block; color: var(--muted); font-size: 11.5px; }
+  .notes { padding-left: 18px; }
+  .notes li { color: var(--text2); font-size: 12px; line-height: 1.6; }
+  .confetti i { position: absolute; width: 7px; height: 12px; border-radius: 2px; opacity: .9; }
+
+  /* темы */
+  .themes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 14px; }
+  .th { border-radius: 14px; overflow: hidden; border: 1px solid var(--line2); background: var(--s1); }
+  .th .mini { height: 120px; display: grid; grid-template-columns: 52px 1fr; gap: 6px; padding: 8px; }
+  .th .mini .ms { border-radius: 8px; }
+  .th .mini .mm { border-radius: 8px; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+  .th .mini .mm i { display: block; height: 8px; border-radius: 4px; }
+  .th .lbl { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; font-size: 12.5px; font-weight: 600; }
+  .th.on { box-shadow: 0 0 0 2px var(--acc); }
+  .row { display: flex; align-items: center; justify-content: space-between; padding: 13px 0; border-bottom: 1px solid var(--line); }
+  .row b { font-size: 13px; font-weight: 600; display: block; }
+  .row small { color: var(--muted); font-size: 11.5px; }
+  .slider { width: 180px; height: 4px; border-radius: 2px; background: var(--s3); position: relative; }
+  .slider i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 2px; background: var(--acc); }
+  .slider i::after { content: ""; position: absolute; right: -8px; top: -6px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,.4); }
+  .segt { display: flex; padding: 3px; background: var(--s2); border: 1px solid var(--line); border-radius: 9px; }
+  .segt span { padding: 5px 12px; border-radius: 6px; font-size: 12px; color: var(--muted); }
+  .segt span.on { background: var(--s3); color: var(--text); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+  .light .segt span.on { background: #fff; }
+
+  /* редактор дизайна */
+  .ed { display: grid; grid-template-columns: 220px 1fr 270px; gap: 12px; height: 100%; }
+  .ed .pnl { padding: 12px; }
+  .lay { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 8px; color: var(--text2); font-size: 12px; }
+  .lay.on { background: color-mix(in srgb, var(--acc) 15%, transparent); color: var(--text); }
+  .lay svg { width: 13px; height: 13px; opacity: .7; }
+  .canvas { position: relative; border-radius: 16px; background: repeating-conic-gradient(rgba(255,255,255,.025) 0 25%, transparent 0 50%) 0 0/24px 24px, rgba(0,0,0,.25); border: 1px solid var(--line); display: grid; place-items: center; overflow: hidden; }
+  .shot { width: 450px; height: 286px; border-radius: 12px; position: relative; overflow: hidden; box-shadow: 0 30px 70px rgba(0,0,0,.6); background: linear-gradient(90deg, rgba(8,8,10,.9), rgba(8,8,10,.2)), var(--art); }
+  .selbox { position: absolute; border: 1.5px solid #4f9be8; }
+  .selbox i { position: absolute; width: 8px; height: 8px; background: #fff; border: 1.5px solid #4f9be8; border-radius: 2px; }
+  .floatbar { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); display: flex; gap: 4px; padding: 5px; border-radius: 12px; background: var(--s2); border: 1px solid var(--line2); backdrop-filter: blur(30px); box-shadow: 0 10px 30px rgba(0,0,0,.4); }
+  .floatbar i { width: 32px; height: 30px; border-radius: 8px; display: grid; place-items: center; color: var(--text2); font-style: normal; }
+  .floatbar i.on { background: var(--acc); color: var(--accText); }
+  .floatbar i svg { width: 15px; height: 15px; }
+  .prop { margin-top: 12px; }
+  .prop label { display: block; color: var(--muted); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 6px; }
+  .fld { height: 30px; border-radius: 8px; background: var(--s2); border: 1px solid var(--line); display: flex; align-items: center; padding: 0 10px; font-size: 12px; color: var(--text2); gap: 8px; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+
+  .notes-page { margin-top: 64px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+  .notes-page div { border: 1px solid #24262b; border-radius: 12px; padding: 16px; background: #111216; }
+  .notes-page b { font-size: 14px; }
+  .notes-page p { color: var(--page-muted); font-size: 13px; line-height: 1.5; margin-top: 6px; }
+  /* ---------- Мастерская модов ---------- */
+  .ws-top { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .ws-top .h { font-size: 22px; margin-right: 6px; }
+  .game { display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin-bottom: 14px; }
+  .game .gi { width: 40px; height: 40px; border-radius: 11px; display: grid; place-items: center; background: linear-gradient(135deg, #2d3b22, #121a0d); color: #b7d68a; flex: none; }
+  .game b { font-size: 13px; }
+  .game small { display: block; color: var(--muted); font-size: 11.5px; margin-top: 2px; }
+  .game .sep { width: 1px; height: 30px; background: var(--line2); margin: 0 6px; }
+  .dot-on { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 10px var(--ok); display: inline-block; margin-right: 6px; }
+  .wmods { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .wmod { overflow: hidden; }
+  .wmod .pv { height: 150px; background-size: cover; background-position: center; position: relative; }
+  .wmod .pv::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,.7)); }
+  .wmod .pv .chips { position: absolute; left: 10px; top: 10px; display: flex; gap: 6px; z-index: 1; }
+  .wmod .pv .scr { position: absolute; left: 12px; bottom: 10px; z-index: 1; display: flex; gap: 6px; }
+  .wmod .bd { padding: 12px 14px 14px; }
+  .wmod .bd b { font-size: 14px; font-weight: 650; }
+  .wmod .bd p { color: var(--muted); font-size: 11.5px; margin-top: 4px; line-height: 1.45; }
+  .wmod .acts { display: flex; gap: 6px; margin-top: 12px; }
+  .wmod .acts .btn { height: 28px; padding: 0 10px; font-size: 11.5px; }
+  .wmod.new { display: grid; place-items: center; border-style: dashed; border-color: var(--line2); color: var(--text2); text-align: center; min-height: 290px; }
+  .wmod.new .plus { width: 54px; height: 54px; border-radius: 16px; display: grid; place-items: center; margin: 0 auto 12px; background: linear-gradient(135deg, var(--acc2), var(--acc)); color: var(--accText); font-size: 30px; box-shadow: 0 10px 30px color-mix(in srgb, var(--acc) 40%, transparent); }
+  .feed { margin-top: 14px; padding: 14px 16px; }
+  .feed .ln { display: flex; gap: 10px; font: 12px/1.7 Consolas, monospace; color: var(--text2); }
+  .feed .ln .t { color: var(--muted); }
+  .feed .ln .ok { color: var(--ok); } .feed .ln .er { color: var(--bad); } .feed .ln .md { color: var(--acc); }
+
+  /* новый мод */
+  .modal2 { position: absolute; left: 50%; top: 70px; width: 980px; transform: translateX(-50%); border-radius: 18px; background: color-mix(in srgb, var(--s2) 94%, transparent); border: 1px solid var(--line2); box-shadow: 0 40px 100px rgba(0,0,0,.6); backdrop-filter: blur(40px); overflow: hidden; display: grid; grid-template-columns: 1fr 330px; }
+  .modal2 .l { padding: 20px 22px; }
+  .modal2 .r { padding: 20px 22px; border-left: 1px solid var(--line); background: rgba(0,0,0,.12); }
+  .tpls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+  .tpl { border-radius: 12px; border: 1px solid var(--line); background: var(--s1); overflow: hidden; }
+  .tpl .tp { height: 92px; display: grid; place-items: center; position: relative; }
+  .tpl .tb2 { padding: 10px 12px; }
+  .tpl .tb2 b { font-size: 12.5px; }
+  .tpl .tb2 small { display: block; color: var(--muted); font-size: 11px; margin-top: 3px; line-height: 1.4; }
+  .tpl.on { box-shadow: 0 0 0 1.5px var(--acc), 0 10px 30px color-mix(in srgb, var(--acc) 20%, transparent); }
+  .tpl .tech { position: absolute; right: 8px; top: 8px; }
+  .tree { font: 12px/1.75 Consolas, monospace; color: var(--text2); margin-top: 8px; }
+  .tree .d { color: var(--muted); }
+  .tree .n { color: var(--ok); }
+
+  /* редактор */
+  .ide { display: grid; grid-template-columns: 210px 1fr 400px; gap: 12px; height: calc(100% - 50px); }
+  .ide .pnl { padding: 10px; overflow: hidden; }
+  .ft2 { font-size: 12px; }
+  .ft2 .f { display: flex; align-items: center; gap: 7px; padding: 5px 8px; border-radius: 7px; color: var(--text2); white-space: nowrap; }
+  .ft2 .f.on { background: color-mix(in srgb, var(--acc) 15%, transparent); color: var(--text); }
+  .ft2 .f i { width: 14px; height: 14px; border-radius: 3px; flex: none; font-style: normal; font: 700 8px/14px Consolas; text-align: center; color: #111; }
+  .ft2 .f.dir { color: var(--muted); }
+  .ft2 .lv1 { padding-left: 18px; } .ft2 .lv2 { padding-left: 30px; }
+  .code { padding: 0; display: flex; flex-direction: column; overflow: hidden; }
+  .tabs2 { display: flex; gap: 2px; padding: 6px 8px 0; border-bottom: 1px solid var(--line); }
+  .tabs2 span { padding: 7px 12px; border-radius: 8px 8px 0 0; font-size: 12px; color: var(--muted); }
+  .tabs2 span.on { background: var(--s2); color: var(--text); box-shadow: inset 0 2px 0 var(--acc); }
+  .src { flex: 1; padding: 10px 0; font: 12.5px/1.65 Consolas, monospace; overflow: hidden; }
+  .src .l { display: flex; white-space: pre; }
+  .src .l .no { width: 40px; text-align: right; padding-right: 14px; color: var(--muted); opacity: .6; flex: none; }
+  .src .l.hl { background: color-mix(in srgb, var(--acc) 10%, transparent); box-shadow: inset 2px 0 0 var(--acc); }
+  .k { color: #c792ea; } .s { color: #c3e88d; } .c { color: #6b7280; font-style: italic; } .f { color: #82aaff; } .nb { color: #f78c6c; }
+  .lint { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-top: 1px solid var(--line); font-size: 11.5px; color: var(--text2); }
+  .gpv { height: 214px; border-radius: 12px; background-size: cover; background-position: center; position: relative; border: 1px solid var(--line2); }
+  .gpv .live { position: absolute; left: 10px; top: 10px; }
+  .scrn { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 10px; background: var(--s2); border: 1px solid var(--line); margin-top: 7px; font-size: 12px; }
+  .scrn b { font-weight: 600; }
+  .scrn small { display: block; color: var(--muted); font-size: 11px; }
+  .scrn .chip { margin-left: auto; }
+  .mlog { margin-top: 10px; padding: 10px 12px; border-radius: 10px; background: rgba(0,0,0,.35); border: 1px solid var(--line); font: 11.5px/1.65 Consolas, monospace; color: var(--text2); }
+  .mlog .ok { color: var(--ok); } .mlog .md { color: var(--acc); } .mlog .t { color: var(--muted); }
+
+  /* справочник игры */
+  .ref2 { display: grid; grid-template-columns: 330px minmax(0, 1fr); gap: 12px; height: calc(100% - 50px); }
+  .ref2 > *, .ide > * { min-width: 0; }
+  .lint { flex-wrap: wrap; }
+  .sq { display: flex; align-items: center; gap: 10px; height: 40px; padding: 0 12px; border-radius: 11px; background: var(--s2); border: 1px solid var(--line2); font-size: 14px; margin-bottom: 10px; }
+  .sq .caret { width: 2px; height: 18px; background: var(--acc); margin-left: -8px; }
+  .hit { padding: 9px 10px; border-radius: 10px; margin-top: 4px; }
+  .hit.on { background: color-mix(in srgb, var(--acc) 14%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--acc) 30%, transparent); }
+  .hit b { font: 600 12.5px Consolas, monospace; }
+  .hit b mark { background: none; color: var(--acc); }
+  .hit small { display: block; color: var(--muted); font-size: 11px; margin-top: 2px; font-family: Consolas, monospace; }
+  .hit .tag { float: right; }
+  .members { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+  .mem { padding: 8px 10px; border-radius: 9px; background: var(--s2); border: 1px solid var(--line); font: 12px Consolas, monospace; color: var(--text2); }
+  .mem b { color: var(--f, #82aaff); font-weight: 600; }
+  .mem small { display: block; font-family: "Segoe UI", sans-serif; color: var(--muted); font-size: 11px; margin-top: 2px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1>TankAir Studio — Мастерская модов</h1>
+    <p>Новый раздел «Разработка»: свои моды для «Мира танков» прямо в студии — из шаблона, с редактором, живым превью, сборкой одной кнопкой и справочником по файлам игры. Всё, что мы сейчас делаем для TankAir вручную (Python 2.7, Haxe → SWF, res_map, установка, лог), становится кнопками.</p>
+  </header>
+  <div id="refs"></div>
+  <div class="notes-page">
+    <div><b>Сборщики внутри студии</b><p>Python 2.7 той же версии, что у игры, и Haxe 4.3 едут вместе со студией (около 45 МБ). Упаковщик SWF и регистрация экранов в res_map — наш готовый код из TankAir.</p></div>
+    <div><b>Редактор кода</b><p>Лёгкий редактор с подсветкой Python, HTML/CSS и Haxe и автодополнением имён из справочника игры. Без тяжёлых зависимостей.</p></div>
+    <div><b>Справочник игры</b><p>При первом запуске и после каждого патча студия разбирает scripts.pkg и Flash-файлы игры в локальный индекс: классы, методы, пути. Код игры остаётся на компьютере.</p></div>
+    <div><b>Живое превью</b><p>Страницы Gameface открываются в окне студии с теми же заглушками, что наш preview.html; данные — образец или настоящие из последнего боя.</p></div>
+    <div><b>Связь с модпаком</b><p>Свой мод добавляется в «Состав модпака» одной кнопкой и собирается в установщик вместе с остальными.</p></div>
+    <div><b>Безопасно для игры</b><p>Файлы игры не меняются: моды ставятся в mods\версия, перед установкой студия ждёт закрытия игры или закрывает её по вашей кнопке.</p></div>
+  </div>
+</div>
+<script>
+const I = {
+  tank: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 15h18l-2 4H5zM6 11h10l2 3H4zM9 8h6v3H9zm6 1h6v1.5h-6z"/></svg>',
+  home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>',
+  grid: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>',
+  search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="14" height="14"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>',
+  brush: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 4l6 6-9 9H5v-6z"/><path d="M12 6l6 6"/></svg>',
+  info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>',
+  box: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 8l-9-5-9 5 9 5zM3 8v8l9 5 9-5V8M12 13v8"/></svg>',
+  cloud: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 18a5 5 0 1 1 1-9.9A6 6 0 0 1 19 10a4 4 0 0 1-1 8z"/><path d="M12 11v6M9.5 13.5L12 11l2.5 2.5"/></svg>',
+  chart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
+  gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg>',
+  play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4l13 8-13 8z"/></svg>',
+  hammer: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 6l4 4M3 21l9-9M12 4l6-1 3 3-1 6-3 1-6-6z"/></svg>',
+  upload: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>',
+  alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l10 18H2zM12 10v5M12 18v.5"/></svg>',
+  refresh: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 11a8 8 0 1 0-2 5.5M20 4v7h-7"/></svg>',
+  text: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 6V4h14v2M12 4v16M9 20h6"/></svg>',
+  img: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="13" height="13"><path d="M5 12l5 5 9-10"/></svg>',
+  cursor: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 7-6 2-2 6z"/></svg>',
+  square: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="3"/></svg>',
+  file: '<svg viewBox="0 0 24 24" fill="none" stroke="#1d1305" stroke-width="2" width="18" height="18"><path d="M6 3h8l5 5v13H6zM14 3v5h5"/></svg>',
+};
+const W = 'workshop-assets/';
+const IC = Object.assign({}, I, {
+  wrench: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14.5 6.5a4 4 0 0 0 5 5L12 19a2.1 2.1 0 0 1-3-3z"/><path d="M14.5 6.5L17 4l3 3-2.5 2.5"/></svg>',
+  book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5M8 7h7"/></svg>',
+  bug: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="7" y="7" width="10" height="13" rx="5"/><path d="M12 7V4M4 12h3M17 12h3M5 18l2.5-1.5M19 18l-2.5-1.5M5 6l2.5 2M19 6l-2.5 2"/></svg>',
+  gamepad: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 8h12a4 4 0 0 1 4 4v1a4 4 0 0 1-7 2.6L14 15h-4l-1 .6A4 4 0 0 1 2 13v-1a4 4 0 0 1 4-4z"/><path d="M7 11v3M5.5 12.5h3M16 12h.5M18 13.5h.5"/></svg>',
+  stop: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>',
+  folder: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>',
+});
+
+// оболочка студии с новым разделом «Разработка»
+function wshell(active, body, extra = '', running = false) {
+  const proj = [['home', 'Обзор'], ['grid', 'Состав модпака', '24'], ['search', 'Каталог модов'], ['brush', 'Оформление'], ['box', 'Сборка']];
+  const dev = [['wrench', 'Мастерская', '3'], ['book', 'Справочник игры'], ['bug', 'Отладчик']];
+  const nav = (list) => list.map(([ic, n, c]) => `<div class="nav ${n === active ? 'on' : ''}">${IC[ic]}${n}${c ? `<span class="cnt">${c}</span>` : ''}</div>`).join('');
+  return `<div class="win">
+    <div class="tb"><span class="logo" style="color:#1d1305">${I.tank}</span><b>TankAir Studio</b><span class="crumb">/ Мастерская</span>
+      <div class="search">${I.search}Поиск модов, файлов игры, действий…<span class="kbd">Ctrl K</span></div>
+      <div class="wc"><i>—</i><i>▢</i><i>✕</i></div></div>
+    <aside class="side">
+      <div class="proj"><span class="av" style="color:#fff">${I.tank.replace('<svg', '<svg width="20" height="20"')}</span><div><b>Тактический модпак</b><small>версия 2.4 · 24 мода</small></div></div>
+      ${nav(proj)}
+      <div class="lab">Разработка</div>
+      ${nav(dev)}
+      <div class="nav">${I.gear}Настройки</div>
+      ${running ? '<div class="foot"><b>Игра запущена</b><small>Установка модов подождёт закрытия игры</small></div>' : '<div class="foot"><b>Игра закрыта</b><small>Можно ставить моды — Мир танков 1.46.0.0</small></div>'}
+    </aside>
+    <main class="main">${body}</main>${extra}
+  </div>`;
+}
+
+const gameBar = (running) => `<div class="card game"><span class="gi">${IC.gamepad}</span>
+  <div><b>Мир танков 1.46.0.0</b><small>C:\\Games\\Tanki · моды в mods\\1.46.0.0</small></div><span class="sep"></span>
+  <div><b>${running ? '<span class="dot-on"></span>Игра запущена' : 'Игра закрыта'}</b><small>${running ? 'установка подождёт закрытия' : 'установка сразу'}</small></div><span class="sep"></span>
+  <div><b>Python 2.7 · Haxe 4.3</b><small>сборщики встроены в студию</small></div>
+  <span style="margin-left:auto;display:flex;gap:8px">${running ? `<span class="btn">${IC.stop}Закрыть игру</span>` : `<span class="btn">${IC.play}Запустить игру</span>`}<span class="btn">${IC.folder}Папка модов</span></span></div>`;
+
+// 1. Мастерская: мои моды
+const wsList = () => wshell('Мастерская', `
+  <div class="ws-top"><span class="h">Мастерская</span><span class="chip on">Мои моды · 3</span><span class="chip">Черновики · 1</span><span class="chip">В модпаке · 2</span><span class="btn p" style="margin-left:auto">${IC.wrench}Новый мод</span></div>
+  ${gameBar(false)}
+  <div class="wmods">
+    <div class="card wmod"><div class="pv" style="background-image:url(${W}hangar.jpg)"><div class="chips"><span class="chip ok">● в игре 0.8.2</span><span class="chip glass">1.46 ✓</span></div><div class="scr"><span class="chip glass">Ангар</span><span class="chip glass">Загрузка</span><span class="chip glass">Результаты</span></div></div>
+      <div class="bd"><b>TankAir Library</b><p>Ангар «Тактический планшет», экран загрузки «Противостояние» и результаты боя «Колода карточек».</p>
+        <div class="acts"><span class="btn p">${IC.hammer}Собрать</span><span class="btn">${IC.upload}Поставить</span><span class="btn">Открыть</span></div></div></div>
+    <div class="card wmod"><div class="pv" style="background-image:url(${W}loading.jpg)"><div class="chips"><span class="chip warn">изменён · не собран</span><span class="chip glass">Flash</span></div></div>
+      <div class="bd"><b>Экран загрузки «Противостояние»</b><p>Отдельной сборкой для модпака: составы, сравнение по типам и уровням.</p>
+        <div class="acts"><span class="btn p">${IC.hammer}Собрать</span><span class="btn">${IC.upload}Поставить</span><span class="btn">Открыть</span></div></div></div>
+    <div class="card wmod new"><div><div class="plus">+</div><b style="font-size:14px">Новый мод</b><p class="mut" style="font-size:12px;margin-top:6px;line-height:1.5;max-width:220px">Окно в ангаре, экран в бою, перехват данных игры или замена файлов — по шаблону за минуту</p></div></div>
+  </div>
+  <div class="card feed"><div style="display:flex;align-items:center;margin-bottom:6px"><span class="h">Последние события</span><span class="btn" style="margin-left:auto;height:28px">${IC.bug}Отладчик</span></div>
+    <div class="ln"><span class="t">11:10:11</span><span class="md">[TankAirResults]</span><span>Карточки результатов открыты</span></div>
+    <div class="ln"><span class="t">11:00:47</span><span class="md">[TankAirLoading]</span><span class="ok">Flash-экран загрузки нарисован: союзников 15</span></div>
+    <div class="ln"><span class="t">10:57:29</span><span class="md">[TankAirLibrary]</span><span>TankAir 0.8.1: экраны зарегистрированы (3)</span></div>
+    <div class="ln"><span class="t">10:46:00</span><span class="md">[TankAirLibrary]</span><span class="er">ImportError: No module named tankair_loading — исправлено в 0.8.1</span></div>
+  </div>`);
+
+// 2. Новый мод: шаблоны
+const tplArt = {
+  hangar: `<div style="width:120px;height:70px;border-radius:6px;background:url(${W}hangar.jpg) center/cover;box-shadow:0 8px 20px rgba(0,0,0,.5)"></div>`,
+  battle: `<div style="width:120px;height:70px;border-radius:6px;background:url(${W}loading.jpg) center/cover;box-shadow:0 8px 20px rgba(0,0,0,.5)"></div>`,
+  hook: `<svg viewBox="0 0 120 70" width="120"><g font-family="Consolas" font-size="9" fill="#c3e88d"><text x="6" y="16">def _set_data(orig, self, vo):</text><text x="16" y="32" fill="#82aaff">result = orig(self, vo)</text><text x="16" y="48" fill="#ffcf7a">_open(_collect(vo))</text><text x="16" y="64" fill="#c792ea">return result</text></g></svg>`,
+  cfg: `<svg viewBox="0 0 120 70" width="120"><rect x="14" y="8" width="92" height="54" rx="6" fill="rgba(0,0,0,.35)" stroke="rgba(255,255,255,.15)"/><g fill="#f0a53a"><rect x="24" y="18" width="40" height="5" rx="2.5" opacity=".6"/><rect x="24" y="32" width="50" height="5" rx="2.5" opacity=".6"/><rect x="24" y="46" width="34" height="5" rx="2.5" opacity=".6"/></g><g><rect x="78" y="16" width="18" height="9" rx="4.5" fill="#f0a53a"/><rect x="78" y="30" width="18" height="9" rx="4.5" fill="#3a3d44"/><rect x="78" y="44" width="18" height="9" rx="4.5" fill="#f0a53a"/></g></svg>`,
+  files: `<svg viewBox="0 0 120 70" width="120"><g fill="none" stroke="#6aa8ff" stroke-width="2"><path d="M30 12h30l10 10v36H30z"/><path d="M60 12v10h10"/><path d="M52 22h30l10 10v30H52z" stroke="#5cc98a" fill="rgba(0,0,0,.4)"/></g><text x="60" y="52" font-family="Consolas" font-size="8" fill="#5cc98a">res_mods</text></svg>`,
+  blank: `<svg viewBox="0 0 120 70" width="120"><rect x="38" y="10" width="44" height="50" rx="6" fill="none" stroke="rgba(255,255,255,.3)" stroke-dasharray="4 4"/><path d="M60 26v18M51 35h18" stroke="#f0a53a" stroke-width="2.5"/></svg>`,
+};
+const tplBg = ['linear-gradient(135deg,#3a2614,#120c08)', 'linear-gradient(135deg,#132535,#081018)', 'linear-gradient(135deg,#1b1b2b,#0b0b12)', 'linear-gradient(135deg,#2c2a14,#100f07)', 'linear-gradient(135deg,#132a1f,#08120d)', 'linear-gradient(135deg,#1c1d22,#0d0e10)'];
+const tpls = [['hangar', 'Окно в ангаре', 'Своя панель или экран поверх ангара. HTML и CSS, живое превью.', 'Gameface'],
+  ['battle', 'Экран в бою', 'Своя панель в бою или на загрузке. Компилируется в SWF.', 'Flash'],
+  ['hook', 'Перехват данных', 'Подписка на событие игры: результаты боя, выбор машины, урон.', 'Python'],
+  ['cfg', 'Мод с настройками', 'Настройки в JSON и окно для их изменения прямо в игре.', 'Gameface'],
+  ['files', 'Замена файлов', 'Озвучка, текстуры, прицелы: файлы кладутся в res_mods или .mtmod.', 'Файлы'],
+  ['blank', 'Пустой мод', 'Только meta.xml и точка входа init/fini — дальше сами.', 'Python']];
+const wsNew = () => wshell('Мастерская', wsList().slice(wsList().indexOf('<main class="main">') + 19, wsList().lastIndexOf('</main>')), `<div class="dim"></div>
+  <div class="modal2">
+    <div class="l"><div class="h" style="font-size:20px">Новый мод</div><p class="mut" style="margin-top:4px;font-size:12.5px">Выберите, что будет делать мод, — студия создаст готовый рабочий каркас с комментариями.</p>
+      <div class="tpls">${tpls.map(([k, n, d, t], i) => `<div class="tpl ${i === 0 ? 'on' : ''}"><div class="tp" style="background:${tplBg[i]}">${tplArt[k]}<span class="chip tech glass">${t}</span></div><div class="tb2"><b>${n}</b><small>${d}</small></div></div>`).join('')}</div>
+    </div>
+    <div class="r"><div class="prop" style="margin-top:0"><label>Название</label><div class="fld" style="color:var(--text)">Счётчик сессии</div></div>
+      <div class="prop"><label>Идентификатор</label><div class="fld">tankair.session_counter</div></div>
+      <div class="two"><div class="prop"><label>Версия игры</label><div class="fld">1.46.0.0 ✓</div></div><div class="prop"><label>Автор</label><div class="fld">artemka9799</div></div></div>
+      <div class="prop"><label>Будут созданы файлы</label>
+        <div class="tree"><div>meta.xml</div><div class="d">res/scripts/client/gui/mods/</div><div>&nbsp;&nbsp;mod_session_counter.py <span class="n">точка входа</span></div><div>&nbsp;&nbsp;session_counter.py <span class="n">окно и данные</span></div><div class="d">res/gui/gameface/mods/session_counter/</div><div>&nbsp;&nbsp;SessionCounter.html <span class="n">вёрстка</span></div><div class="d">res_map.json — регистрация экрана сама</div></div></div>
+      <div style="display:flex;gap:8px;margin-top:18px"><span class="btn">Отмена</span><span class="btn p" style="flex:1;justify-content:center">Создать мод</span></div></div>
+  </div>`);
+
+// 3. Редактор мода
+const code = [
+  ['c', '# Окно мода в ангаре: показываем бои и урон за сессию'],
+  ['', '<span class="k">from</span> frameworks.wulf <span class="k">import</span> WindowFlags, WindowLayer'],
+  ['', '<span class="k">from</span> gui.impl.pub <span class="k">import</span> WindowImpl'],
+  ['', ''],
+  ['', '<span class="k">def</span> <span class="f">_show</span>():'],
+  ['', '    window = WindowImpl(WindowFlags.WINDOW, content=SessionView(_layoutID),'],
+  ['', '                        layer=WindowLayer.SUB_VIEW, name=<span class="s">\'Session\'</span>)'],
+  ['', '    window.load()'],
+  ['', ''],
+  ['hl', '<span class="k">def</span> <span class="f">_on_results</span>(original, self, vo):'],
+  ['hl', '    _session[<span class="s">\'battles\'</span>] += <span class="nb">1</span>'],
+  ['hl', '    _session[<span class="s">\'damage\'</span>] += _my_damage(vo)'],
+  ['hl', '    _refresh()'],
+  ['', '    <span class="k">return</span> original(self, vo)'],
+  ['', ''],
+  ['', '<span class="k">def</span> <span class="f">init</span>():'],
+  ['', '    _patch(BattleResultsMeta, <span class="s">\'as_setDataS\'</span>, _on_results)'],
+  ['', '    g_currentVehicle.onChanged += _refresh'],
+];
+const fileTree = [['dir', 0, 'session_counter'], ['xml', 1, 'meta.xml'], ['dir', 1, 'scripts / mods'], ['py', 2, 'mod_session_counter.py'], ['py', 2, 'session_counter.py', 1], ['dir', 1, 'gameface'], ['html', 2, 'SessionCounter.html'], ['css', 2, 'session.css'], ['dir', 1, 'Справочник'], ['ref', 2, 'BattleResultsMeta'], ['ref', 2, 'CurrentVehicle']];
+const fcol = { xml: '#ffcf7a', py: '#82aaff', html: '#f78c6c', css: '#c792ea', ref: '#5cc98a' };
+const wsIde = () => wshell('Мастерская', `
+  <div class="ws-top"><span class="h" style="font-size:18px">Счётчик сессии</span><span class="chip">tankair.session_counter · 0.1</span><span class="chip ok">Python 2.7 ✓</span>
+    <span style="margin-left:auto;display:flex;gap:8px"><span class="btn">${IC.play}Превью</span><span class="btn">${IC.upload}Поставить в игру</span><span class="btn p">${IC.hammer}Собрать .mtmod <span class="kbd" style="margin-left:4px;background:rgba(0,0,0,.15);border-color:rgba(0,0,0,.2);color:#1d1305">Ctrl B</span></span></span></div>
+  <div class="ide">
+    <div class="card pnl ft2">${fileTree.map(([t, lv, n, on]) => t === 'dir' ? `<div class="f dir lv${lv}">▾ ${n}</div>` : `<div class="f lv${lv} ${on ? 'on' : ''}"><i style="background:${fcol[t]}">${t === 'ref' ? 'R' : t.slice(0, 2).toUpperCase()}</i>${n}</div>`).join('')}</div>
+    <div class="card code"><div class="tabs2"><span class="on">session_counter.py</span><span>SessionCounter.html</span><span>meta.xml</span></div>
+      <div class="src">${code.map(([cls, t], i) => `<div class="l ${cls === 'hl' ? 'hl' : ''}"><span class="no">${i + 1}</span><span class="${cls === 'c' ? 'c' : ''}">${t}</span></div>`).join('')}</div>
+      <div class="lint"><span class="chip ok">✓ синтаксис Python 2.7</span><span class="chip ok">✓ BattleResultsMeta.as_setDataS есть в 1.46</span><span class="chip warn">подсказка: _my_damage — функция из шаблона</span></div></div>
+    <div class="c-col" style="display:flex;flex-direction:column;gap:10px">
+      <div class="card pnl"><div style="display:flex;align-items:center;margin-bottom:8px"><span class="h">Живое превью</span><span class="chip" style="margin-left:auto">1920 × 1080</span></div>
+        <div class="gpv" style="background-image:url(${W}hangar.jpg)"><span class="chip ok live">● обновляется при сохранении</span></div></div>
+      <div class="card pnl"><span class="h">Экраны мода</span>
+        <div class="scrn"><div><b>SessionCounter.html</b><small>Gameface · ангар, слой SUB_VIEW</small></div><span class="chip ok">в res_map</span></div>
+        <div class="mlog"><div><span class="t">12:41:03</span> <span class="md">[Session]</span> окно готово: battles=3</div><div><span class="t">12:41:03</span> <span class="md">[js:session]</span> <span class="ok">render 4 ms</span></div></div></div>
+    </div>
+  </div>`);
+
+// 4. Сборка и установка
+const wsBuild = () => wshell('Мастерская', `
+  <div class="build">
+    <div class="card" style="padding:22px">
+      <div style="display:flex;align-items:center;gap:10px"><span class="h" style="font-size:22px">Сборка TankAir Library 0.8.3</span><span class="chip warn">идёт · 0:07</span><span class="btn" style="margin-left:auto">Отменить</span></div>
+      <div class="steps" style="margin-top:22px">
+        <div class="step done"><span class="st">${I.check}</span><div><b>Проверка кода</b><small>3 файла Python 2.7, 3 страницы Gameface, 1 исходник Flash — ошибок нет</small></div><span class="t">0:01</span></div>
+        <div class="step done"><span class="st">${I.check}</span><div><b>Компиляция .pyc</b><small>тем же Python 2.7, что у игры — tankair_library, tankair_loading, tankair_results</small></div><span class="t">0:02</span></div>
+        <div class="step done"><span class="st">${I.check}</span><div><b>Flash: Haxe → SWF</b><small>TankAirLoading.swf, 10 КБ · класс TankAirLoadingUI, экземпляр «main»</small></div><span class="t">0:03</span></div>
+        <div class="step run"><span class="st"></span><div style="flex:1"><b>Регистрация экранов</b><small>res_map.json: 3 экрана уже на месте — перезапуск клиента не нужен</small><div class="bar"><i style="width:60%"></i></div></div><span class="t">0:01</span></div>
+        <div class="step wait"><span class="st"></span><div><b>Упаковка .mtmod</b><small>meta.xml, скрипты, экраны, иконки</small></div></div>
+        <div class="step wait"><span class="st"></span><div><b>Установка в игру</b><small>mods\\1.46.0.0 · старая 0.8.2 будет убрана</small></div></div>
+      </div>
+    </div>
+    <div class="card release"><div class="top" style="--art:url(${W}results.jpg);background:linear-gradient(180deg, transparent 30%, rgba(0,0,0,.8)), url(${W}results.jpg) center/cover"><span class="chip glass" style="align-self:flex-start;margin-bottom:auto">готово к установке</span><h3>0.8.3</h3><span style="color:rgba(255,255,255,.75);font-size:12px">tankair.library · Мир танков 1.46</span></div>
+      <div class="rb"><div class="file"><span class="ic">${I.file}</span><div><b>tankair.library_0.8.3.mtmod</b><small>248 КБ · dist</small></div></div>
+        <div class="h" style="margin-top:4px">Игра запущена</div>
+        <p class="mut" style="font-size:12px;line-height:1.5">Файл мода занят игрой. Студия поставит мод, как только игра закроется, или может закрыть её сама.</p>
+        <div style="display:flex;gap:8px"><span class="btn" style="flex:1;justify-content:center">Поставить после закрытия</span></div>
+        <div style="display:flex;gap:8px"><span class="btn p" style="flex:1;justify-content:center">${IC.stop}Закрыть игру и поставить</span></div>
+        <div class="h" style="margin-top:6px">После установки</div>
+        <div class="opt">Запустить игру<span class="tgl"></span></div>
+        <div class="opt" style="border:0">Открыть отладчик с логом мода<span class="tgl"></span></div>
+      </div></div>
+  </div>`, '', true);
+
+// 5. Справочник игры
+const wsRef = () => wshell('Справочник игры', `
+  <div class="ws-top"><span class="h">Справочник игры</span><span class="chip">Мир танков 1.46 · 4 812 скриптов · 2 794 класса Flash</span><span class="btn" style="margin-left:auto">${IC.refresh}Обновить после патча</span></div>
+  <div class="ref2">
+    <div class="card pnl" style="padding:12px">
+      <div class="sq">${I.search.replace('width="14" height="14"', 'width="18" height="18"')}<span>BattleResults</span><span class="caret"></span></div>
+      <div style="display:flex;gap:6px;margin-bottom:6px"><span class="chip on">Всё</span><span class="chip">Python</span><span class="chip">Flash</span><span class="chip">Gameface</span></div>
+      <div class="hit on"><span class="chip ok tag">Python</span><b><mark>BattleResults</mark>Meta</b><small>gui/Scaleform/daapi/view/meta</small></div>
+      <div class="hit"><span class="chip ok tag">Python</span><b><mark>BattleResults</mark>Window</b><small>gui/Scaleform/daapi/view/battle_results_window</small></div>
+      <div class="hit"><span class="chip tag">Flash</span><b>net.wg…<mark>BattleResults</mark></b><small>lobby.swf · класс окна</small></div>
+      <div class="hit"><span class="chip ok tag">Python</span><b><mark>BattleResults</mark>Service</b><small>gui/battle_results/service</small></div>
+      <div class="hit"><span class="chip ok tag">Python</span><b>templates.regular</b><small>как устроены данные: team1, personal, common…</small></div>
+      <div class="hit"><span class="chip warn tag">Образец</span><b>TankAirResults_last.json</b><small>настоящие данные из вашего последнего боя</small></div>
+    </div>
+    <div class="card pnl" style="padding:16px 18px">
+      <div style="display:flex;align-items:center;gap:8px"><span class="h" style="font-size:18px;font-family:Consolas,monospace">BattleResultsMeta</span><span class="chip">Python</span>
+        <span style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><span class="btn">Открыть код</span><span class="btn p">${IC.wrench}Перехватить в моём моде</span></span></div>
+      <p class="mut" style="margin-top:8px;font-size:12.5px;line-height:1.5">Python-часть Flash-окна результатов боя. Игра один раз вызывает <b style="color:var(--text);font-family:Consolas">as_setDataS(vo)</b> со всеми данными боя — сюда удобно встать, чтобы показать свой экран результатов.</p>
+      <div class="members">
+        <div class="mem"><b>as_setDataS</b>(data)<small>все данные боя одним словарём — ваш мод TankAir перехватывает это</small></div>
+        <div class="mem"><b>as_setClanEmblemS</b>(uid, iconTag)<small>эмблема клана в таблице команд</small></div>
+        <div class="mem"><b>as_setTeamInfoS</b>(uid, iconTag, teamName)<small>названия команд в клановых боях</small></div>
+        <div class="mem"><b>onWindowClose</b>()<small>закрыть окно — вызов из Flash</small></div>
+        <div class="mem"><b>showUnlockWindow</b>(itemID, unlockType)<small>кнопка «к исследованию»</small></div>
+        <div class="mem"><b>onResultsSharingBtnPress</b>()<small>кнопка «Поделиться»</small></div>
+      </div>
+      <div class="h" style="margin-top:16px">Пример данных из вашего боя</div>
+      <div class="mlog" style="font-size:12px"><div>common.<b>resultStr</b> = <span class="ok">"ПОБЕДА!"</span>  · <b>arenaStr</b> = <span class="ok">"Берлин — Стандартный бой"</span></div><div>personal.<b>creditsStr</b> = <span class="ok">"26 139"</span>  · <b>xpStr</b> = <span class="ok">"1 906"</span></div><div>team1[3].<b>damageDealt</b> = <span class="md">1477</span>  · <b>isSelf</b> = <span class="md">True</span></div></div>
+    </div>
+  </div>`);
+
+const REFS = [
+  ['1', 'Мастерская — мои моды', 'Новый раздел «Разработка» в меню студии. Сверху — состояние игры: версия, папка модов, запущена ли игра, встроенные сборщики. Карточки своих модов с настоящими скриншотами экранов, статусом («в игре 0.8.2», «изменён · не собран») и кнопками «Собрать» и «Поставить». Внизу — свежие строки лога ваших модов.', wsList],
+  ['2', 'Новый мод из шаблона', 'Шесть шаблонов под то, что мы уже умеем делать руками: окно в ангаре (Gameface), экран в бою (Flash через Haxe), перехват данных игры, мод с настройками, замена файлов, пустой. Справа — название, ID, версия игры и список файлов, которые создаст студия; регистрация экрана в res_map — сама.', wsNew],
+  ['3', 'Редактор мода', 'Дерево файлов мода, редактор кода с подсветкой и проверкой на лету (синтаксис Python 2.7 и наличие методов игры по справочнику), живое превью окна Gameface с обновлением при сохранении, список экранов мода и короткий лог из игры.', wsIde],
+  ['4', 'Сборка и установка', 'Те же шаги, что делает наш build.py, но с понятным прогрессом: проверка, .pyc, Haxe → SWF, регистрация экранов, упаковка, установка. Если игра запущена — «поставить после закрытия» или «закрыть игру и поставить», потом запуск игры и отладчик.', wsBuild],
+  ['5', 'Справочник игры', 'Поиск по скриптам и Flash-классам текущей версии игры — то, что мы сейчас делаем декомпилятором и abcdump. Карточка класса: методы с пояснениями, пример настоящих данных из вашего боя и кнопка «Перехватить в моём моде», которая добавит готовую обёртку в код.', wsRef],
+];
+document.getElementById('refs').innerHTML = REFS.map(([n, t, p, f]) => `<section class="ref"><div class="ref-head"><span class="n">${n}</span><h2>${t}</h2><p>${p}</p></div><div class="stage">${f()}</div></section>`).join('');
+function fit() { document.querySelectorAll('.stage').forEach((s) => { const k = s.clientWidth / 1280; s.firstElementChild.style.transform = `scale(${k})`; s.style.height = 800 * k + 'px'; }); }
+addEventListener('resize', fit); fit();
+
+</script>
+</body>
+</html>
